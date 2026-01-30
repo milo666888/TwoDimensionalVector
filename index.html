@@ -22,7 +22,7 @@
     .canvas-section { flex: 3; position: relative; background: #000; overflow: hidden; }
     #vectorCanvas { width: 100%; height: 100%; display: block; }
 
-    /* 控制面板 - 電腦版預設並列 */
+    /* 控制面板 - 電腦版預設 */
     .control-section { flex: 2; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; background: #000; border-left: 1px solid #333; }
     .panel { background: #050505; border-radius: 0.4rem; padding: 0.5rem 0.6rem; border: 1px solid #222; font-size: 0.85rem; }
     .panel h2 { margin: 0 0 0.35rem; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; color: #eee; }
@@ -43,6 +43,7 @@
     select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.2rem; }
     .result-display { margin-top: 0.4rem; padding: 0.4rem; background: #111; border-radius: 0.3rem; font-family: monospace; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;}
     
+    /* LOGO 定位 */
     .company-logo {
       position: absolute; left: 20px; bottom: 20px; height: 45px;
       opacity: 0.9; pointer-events: none; z-index: 5;
@@ -50,21 +51,18 @@
 
     #mobileSettingsBtn { display: none; }
 
-    /* --- 手機版專屬樣式 (完全不影響電腦) --- */
+    /* --- 手機版專屬樣式 --- */
     @media (max-width: 768px) {
-      /* 讓畫布填滿整個 main 區域 */
       .canvas-section { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         z-index: 1; padding: 0;
       }
       
-      /* 手機版 LOGO 縮小並移到右下角 */
       .company-logo {
         position: fixed; left: auto; right: 15px; bottom: 15px;
         height: 22px; z-index: 90; opacity: 1;
       }
 
-      /* ⚙️ 藍色圓形設定按鈕 */
       #mobileSettingsBtn {
         display: flex; position: fixed; right: 15px; bottom: 45px;
         width: 50px; height: 50px; background: #2563eb; border-radius: 50%;
@@ -72,33 +70,27 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.6); cursor: pointer; font-size: 1.6rem;
       }
 
-      /* 控制面板改為從底部彈出的選單 */
       .control-section {
         position: fixed; bottom: 0; left: 0; width: 100%; height: 75vh;
         z-index: 200; border-left: none; border-top: 1px solid #444;
-        transform: translateY(100%); /* 隱藏 */
+        transform: translateY(100%); 
         padding: 1.2rem; border-radius: 1.5rem 1.5rem 0 0;
         box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .control-section.active { transform: translateY(0); }
 
-      /* 手機版選單關閉鈕 */
       .close-menu {
         display: block; text-align: center; padding: 0.8rem; margin-bottom: 1.2rem;
         background: #333; border-radius: 0.8rem; color: #fff; font-weight: bold;
-        border: 1px solid #555;
       }
     }
-    
-    /* 輔助：隱藏桌面不需要的元素 */
-    @media (min-width: 769px) { .close-menu { display: none; } }
   </style>
 </head>
 <body>
   <div class="app-container">
     <header><h1>向量互動教具</h1></header>
-    <main>
+    <main id="mainContainer">
       <section class="canvas-section">
         <canvas id="vectorCanvas"></canvas>
         <img src="company-logo.png" alt="LOGO" class="company-logo">
@@ -110,7 +102,7 @@
         <div class="close-menu" id="closeMenuBtn">確認並關閉選單 ✕</div>
         
         <div class="panel">
-          <h2>向量輸入</h2>
+          <h2>向量輸入 (起點, 分量)</h2>
           <div class="vector-row">
             <label><span class="vec-var">A</span> <span class="color-dot" style="background:#60a5fa;"></span></label>
             <input type="number" step="0.1" id="A_tail_x"> <input type="number" step="0.1" id="A_tail_y">
@@ -128,14 +120,14 @@
         </div>
 
         <div class="panel">
-          <h2>向量運算</h2>
+          <h2>向量運算模式</h2>
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span>模式：</span>
             <select id="operationSelect" style="flex:1;">
               <option value="none">不顯示運算</option>
-              <option value="AplusB">A + B</option>
+              <option value="AplusB">A + B (合成)</option>
               <option value="BplusA">B + A</option>
-              <option value="AminusB">A - B</option>
+              <option value="AminusB">A - B (差)</option>
               <option value="BminusA">B - A</option>
             </select>
           </div>
@@ -156,7 +148,6 @@
   </div>
 
   <script>
-    // --- 介面控制邏輯 ---
     const settingsBtn = document.getElementById('mobileSettingsBtn');
     const closeBtn = document.getElementById('closeMenuBtn');
     const panel = document.getElementById('controlPanel');
@@ -164,18 +155,23 @@
     settingsBtn.onclick = () => panel.classList.add('active');
     closeBtn.onclick = () => panel.classList.remove('active');
 
-    // --- 繪圖核心邏輯 ---
     const canvas = document.getElementById("vectorCanvas");
     const ctx = canvas.getContext("2d");
     let width = 0, height = 0, centerX = 0, centerY = 0, scale = 40;
 
     function resizeCanvas() {
-      const parent = canvas.parentNode;
-      width = parent.clientWidth; height = parent.clientHeight;
+      // 確保獲取的是 main 容器的實際寬高
+      const container = document.getElementById("mainContainer");
+      width = container.clientWidth;
+      height = container.clientHeight;
+      
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = width * dpr; canvas.height = height * dpr;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      centerX = width / 2; centerY = height / 2;
+      
+      centerX = width / 2;
+      centerY = height / 2;
       scale = Math.min(width, height) / 10;
       draw();
     }
@@ -219,7 +215,6 @@
     function drawGrid() {
       ctx.clearRect(0, 0, width, height);
       ctx.strokeStyle = "#222"; ctx.lineWidth = 1; ctx.beginPath();
-      // 加大繪製範圍確保排滿
       const maxUnitsX = Math.ceil(width / scale) + 2; 
       const maxUnitsY = Math.ceil(height / scale) + 2;
       for (let i = -maxUnitsX; i <= maxUnitsX; i++) { const x = centerX + i * scale; ctx.moveTo(x, 0); ctx.lineTo(x, height); }
@@ -321,7 +316,7 @@
     function handleDown(evt) {
       if (draggingState) return;
       const pos = getEventPos(evt);
-      const tol2 = 1200; // 加大感應範圍
+      const tol2 = 1200; 
       for (let i = vectors.length - 1; i >= 0; i--) {
         const v = vectors[i]; const t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x + v.dx, v.tail.y + v.dy);
         if (dist2(pos, t) < tol2) { draggingState = { vecId: v.id, mode: "tail" }; return; }
@@ -347,8 +342,7 @@
         v.dx = snappedX - v.tail.x; v.dy = snappedY - v.tail.y;
       } else if (draggingState.mode === "move") {
         const dx = wPos.x - draggingState.initClickWorld.x, dy = wPos.y - draggingState.initClickWorld.y;
-        v.tail.x = snapToIntIfClose(draggingState.initTail.x + dx); 
-        v.tail.y = snapToIntIfClose(draggingState.origTail ? 0 : draggingState.initTail.y + dy); 
+        v.tail.x = snapToIntIfClose(draggingState.initTail.x + dx); v.tail.y = snapToIntIfClose(draggingState.initTail.y + dy);
       }
       syncInputsFromState(); draw();
     }
