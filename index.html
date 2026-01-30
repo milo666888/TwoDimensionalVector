@@ -15,7 +15,7 @@
     header h1 { margin: 0; font-size: 1rem; }
     main { flex: 1; display: flex; min-height: 0; position: relative; }
     
-    /* --- 電腦版佈局調整 (收緊空間) --- */
+    /* --- 電腦版佈局 --- */
     .canvas-section { flex: 3; position: relative; background: #000; overflow: hidden; }
     #vectorCanvas { width: 100%; height: 100%; background: #000; display: block; touch-action: none; }
     .company-logo { position: absolute; left: 15px; bottom: 15px; height: 40px; opacity: 0.9; pointer-events: none; z-index: 50; }
@@ -24,9 +24,8 @@
     .panel { background: #050505; border-radius: 0.3rem; padding: 0.4rem 0.6rem; border: 1px solid #222; font-size: 0.8rem; }
     .panel h2 { margin: 0 0 0.3rem; font-size: 0.85rem; border-bottom: 1px solid #333; padding-bottom: 0.15rem; color: #ddd; }
     
-    /* 向量符號 ⇀ */
     .vec-var { font-family: "Times New Roman", serif; font-style: italic; font-weight: bold; position: relative; display: inline-flex; align-items: center; padding-top: 0.3em; }
-    .vec-var::after { content: "⇀"; position: absolute; top: -0.3em; left: 50%; transform: translateX(-50%); font-size: 1.1em; font-weight: normal; }
+    .vec-var::after { content: "⇀"; position: absolute; top: -0.45em; left: 50%; transform: translateX(-50%); font-size: 1.1em; font-weight: normal; }
 
     .vector-row { display: grid; grid-template-columns: 60px repeat(4, 1fr); gap: 0.2rem; align-items: center; margin-bottom: 0.3rem; font-size: 0.75rem; }
     .label-box { display: flex; align-items: center; gap: 4px; }
@@ -42,7 +41,7 @@
     #mobileSettingsBtn { display: none; }
     .close-menu { display: none; }
 
-    /* --- 手機版專屬樣式 --- */
+    /* --- 手機版 --- */
     @media (max-width: 768px) {
       .canvas-section { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; padding: 0; }
       #vectorCanvas { border-radius: 0; }
@@ -72,12 +71,9 @@
         <canvas id="vectorCanvas"></canvas>
         <img src="company-logo.png" alt="LOGO" class="company-logo">
       </section>
-
       <div id="mobileSettingsBtn">⚙️</div>
-
       <section class="control-section" id="controlPanel">
-        <div class="close-menu" id="closeMenuBtn">確認並關閉 ✕</div>
-        
+        <div class="close-menu" id="closeMenuBtn">確認並關閉選單 ✕</div>
         <div class="panel">
           <h2>向量輸入 (起點, 向量)</h2>
           <div class="vector-row">
@@ -95,7 +91,6 @@
             <button id="resetBtn">重設</button>
           </div>
         </div>
-
         <div class="panel">
           <h2>向量運算模式</h2>
           <select id="operationSelect">
@@ -110,7 +105,6 @@
             <span id="addResultText">（未開啟）</span>
           </div>
         </div>
-
         <div class="panel">
           <h2>詳細資訊</h2>
           <div id="infoA" class="info-line"></div>
@@ -153,42 +147,31 @@
     ];
     const f2 = (x) => Math.round(x * 100) / 100;
 
-    // --- 智慧磁吸邏輯 (維持向量大小，僅平移) ---
-    const SNAP_TOL = 0.25; 
-    function getSnappedPos(targetWorldPos, otherV) {
-      let finalPos = { x: targetWorldPos.x, y: targetWorldPos.y };
-      
-      // 1. 與另一向量的端點吸附 (優先權高)
+    // --- 磁吸工具 (回傳磁吸後的世界座標) ---
+    const SNAP_TOL = 0.28;
+    function getSnapTarget(pos, otherV) {
       const otherHead = { x: otherV.tail.x + otherV.dx, y: otherV.tail.y + otherV.dy };
-      if (Math.hypot(finalPos.x - otherV.tail.x, finalPos.y - otherV.tail.y) < SNAP_TOL) {
-        return { x: otherV.tail.x, y: otherV.tail.y };
-      }
-      if (Math.hypot(finalPos.x - otherHead.x, finalPos.y - otherHead.y) < SNAP_TOL) {
-        return { x: otherHead.x, y: otherHead.y };
-      }
-
-      // 2. 整數網格吸附
-      if (Math.abs(finalPos.x - Math.round(finalPos.x)) < SNAP_TOL) finalPos.x = Math.round(finalPos.x);
-      if (Math.abs(finalPos.y - Math.round(finalPos.y)) < SNAP_TOL) finalPos.y = Math.round(finalPos.y);
-      
-      return finalPos;
+      // 1. 優先吸附另一向量端點
+      if (Math.hypot(pos.x - otherV.tail.x, pos.y - otherV.tail.y) < SNAP_TOL) return { x: otherV.tail.x, y: otherV.tail.y };
+      if (Math.hypot(pos.x - otherHead.x, pos.y - otherHead.y) < SNAP_TOL) return { x: otherHead.x, y: otherHead.y };
+      // 2. 次要吸附網格整數點
+      let snapX = Math.abs(pos.x - Math.round(pos.x)) < SNAP_TOL ? Math.round(pos.x) : pos.x;
+      let snapY = Math.abs(pos.y - Math.round(pos.y)) < SNAP_TOL ? Math.round(pos.y) : pos.y;
+      return { x: snapX, y: snapY };
     }
 
     function drawVectorLabel(text, dx, dy, tx, ty, hx, hy, color) {
       ctx.save();
       const midX = (tx + hx) / 2, midY = (ty + hy) / 2;
       const ang = Math.atan2(hy - ty, hx - tx);
-      const lx = midX + Math.cos(ang - Math.PI / 2) * 28;
-      const ly = midY + Math.sin(ang - Math.PI / 2) * 28;
-
+      const lx = midX + Math.cos(ang - Math.PI / 2) * 26;
+      const ly = midY + Math.sin(ang - Math.PI / 2) * 26;
       ctx.fillStyle = color; ctx.font = "italic bold 17px 'Times New Roman'"; ctx.textAlign = "center";
       ctx.fillText(text, lx, ly);
-
       const charW = ctx.measureText(text).width;
-      const sx = lx - charW/2, sy = ly - 21;
-      ctx.strokeStyle = color; ctx.lineWidth = 1.2; ctx.beginPath();
+      const sx = lx - charW/2, sy = ly - 18; 
+      ctx.strokeStyle = color; ctx.lineWidth = 1.3; ctx.beginPath();
       ctx.moveTo(sx, sy); ctx.lineTo(sx + 12, sy); ctx.lineTo(sx + 8, sy - 3); ctx.stroke();
-
       ctx.font = "bold 13px sans-serif"; ctx.textAlign = "left";
       ctx.fillText(`(${f2(dx)}, ${f2(dy)})`, lx + charW/2 + 3, ly);
       ctx.restore();
@@ -263,7 +246,7 @@
       }
     }
 
-    // --- 改進的拖拉系統 (全平移磁吸) ---
+    // --- 核心互動系統 (修正模式衝突) ---
     let drag = null;
     function getPos(e) {
       const r = canvas.getBoundingClientRect();
@@ -271,39 +254,56 @@
       const cy = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: cx - r.left, y: cy - r.top };
     }
+    
     canvas.addEventListener("mousedown", (e) => {
       const p = getPos(e); const tol = 30 * 30;
       for (let i = 1; i >= 0; i--) {
         const v = vectors[i], t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x+v.dx, v.tail.y+v.dy);
-        if ((p.x-t.sx)**2 + (p.y-t.sy)**2 < tol) { drag = { id: v.id, mode: "tail", offset: screenToWorld(p.x, p.y) }; break; }
-        if ((p.x-h.sx)**2 + (p.y-h.sy)**2 < tol) { drag = { id: v.id, mode: "head", offset: screenToWorld(p.x, p.y) }; break; }
+        // 先判斷端點
+        if ((p.x-t.sx)**2 + (p.y-t.sy)**2 < tol) { drag = { id: v.id, mode: "tail" }; break; }
+        if ((p.x-h.sx)**2 + (p.y-h.sy)**2 < tol) { drag = { id: v.id, mode: "head" }; break; }
+        // 後判斷中間 (平移)
         const mx = (t.sx+h.sx)/2, my = (t.sy+h.sy)/2;
-        if ((p.x-mx)**2 + (p.y-my)**2 < tol * 2) { drag = { id: v.id, mode: "move", offset: screenToWorld(p.x, p.y), oTail: {...v.tail} }; break; }
+        if ((p.x-mx)**2 + (p.y-my)**2 < tol * 2.5) { drag = { id: v.id, mode: "move", offset: screenToWorld(p.x, p.y), oTail: {...v.tail} }; break; }
       }
     });
+
     window.addEventListener("mousemove", (e) => {
       if (!drag) return; e.preventDefault();
       const w = screenToWorld(getPos(e).x, getPos(e).y);
       const v = vectors.find(vec => vec.id === drag.id);
       const otherV = vectors.find(vec => vec.id !== drag.id);
       
-      if (drag.mode === "tail" || drag.mode === "head") {
-        // 先算出沒磁吸前，該點應該在的位置
-        let targetPoint = (drag.mode === "tail") ? {x: w.x, y: w.y} : {x: w.x, y: w.y};
-        // 取得磁吸後的世界座標
-        const snapped = getSnappedPos(targetPoint, otherV);
-        // 核心：透過移動起點來達到磁吸，不改變向量分量
-        v.tail.x = snapped.x - (drag.mode === "head" ? v.dx : 0);
-        v.tail.y = snapped.y - (drag.mode === "head" ? v.dy : 0);
+      if (drag.mode === "tail") {
+        // 模式：改變起點 (維持終點固定，所以 dx 也會變)
+        const currentHead = { x: v.tail.x + v.dx, y: v.tail.y + v.dy };
+        const snapped = getSnapTarget(w, otherV);
+        v.tail.x = snapped.x; v.tail.y = snapped.y;
+        v.dx = currentHead.x - v.tail.x; v.dy = currentHead.y - v.tail.y;
+      } else if (drag.mode === "head") {
+        // 模式：改變終點 (維持起點固定，改變 dx)
+        const snapped = getSnapTarget(w, otherV);
+        v.dx = snapped.x - v.tail.x; v.dy = snapped.y - v.tail.y;
       } else if (drag.mode === "move") {
-        v.tail.x = drag.oTail.x + (w.x - drag.offset.x);
-        v.tail.y = drag.oTail.y + (w.y - drag.offset.y);
-        // 移動模式也加入整數點磁吸
-        if (Math.abs(v.tail.x - Math.round(v.tail.x)) < SNAP_TOL) v.tail.x = Math.round(v.tail.x);
-        if (Math.abs(v.tail.y - Math.round(v.tail.y)) < SNAP_TOL) v.tail.y = Math.round(v.tail.y);
+        // 模式：平移整個向量 (維持 dx 不變)
+        const newTail = { x: drag.oTail.x + (w.x - drag.offset.x), y: drag.oTail.y + (w.y - drag.offset.y) };
+        const newHead = { x: newTail.x + v.dx, y: newTail.y + v.dy };
+        
+        // 平移時的智慧磁吸：檢查起點或終點是否靠近目標
+        const snapTail = getSnapTarget(newTail, otherV);
+        const snapHead = getSnapTarget(newHead, otherV);
+        
+        if (snapTail.x !== newTail.x || snapTail.y !== newTail.y) {
+           v.tail.x = snapTail.x; v.tail.y = snapTail.y; // 吸附起點
+        } else if (snapHead.x !== newHead.x || snapHead.y !== newHead.y) {
+           v.tail.x = snapHead.x - v.dx; v.tail.y = snapHead.y - v.dy; // 吸附終點
+        } else {
+           v.tail.x = newTail.x; v.tail.y = newTail.y; // 無吸附，自由平移
+        }
       }
       syncInputsFromState(); draw();
     });
+
     window.addEventListener("mouseup", () => drag = null);
     canvas.addEventListener("touchstart", (e) => canvas.dispatchEvent(new MouseEvent('mousedown', {clientX: e.touches[0].clientX, clientY: e.touches[0].clientY})), {passive: false});
     window.addEventListener("touchmove", (e) => window.dispatchEvent(new MouseEvent('mousemove', {clientX: e.touches[0].clientX, clientY: e.touches[0].clientY})), {passive: false});
