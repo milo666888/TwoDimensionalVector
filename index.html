@@ -18,6 +18,7 @@
     .canvas-section { flex: 3; padding: 0.4rem; position: relative; }
     #vectorCanvas { width: 100%; height: 100%; background: #000; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; }
 
+    /* 電腦版預設 LOGO：左下角 */
     .company-logo {
       position: absolute; left: 20px; bottom: 20px; height: 45px;
       opacity: 0.9; pointer-events: none; z-index: 10;
@@ -43,7 +44,21 @@
     select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.2rem; }
     .info-text { font-size: 0.8rem; margin: 0.1rem 0; color: #ccc; display: flex; align-items: center; gap: 0.3rem; }
 
-    @media (max-width: 768px) { main { flex-direction: column; } .canvas-section { height: 45vh; } }
+    /* 手機版專屬樣式 */
+    @media (max-width: 768px) { 
+      main { flex-direction: column; } 
+      
+      /* 1. 讓向量圖區域變大 (從 45 提升到 60) */
+      .canvas-section { height: 60vh; } 
+
+      /* 2. 手機版 LOGO 移至右下角並縮小 */
+      .company-logo {
+        left: auto;      /* 取消左側定位 */
+        right: 15px;     /* 改為右側 15px */
+        bottom: 15px;    /* 距離底部 15px */
+        height: 30px;    /* 縮小高度 */
+      }
+    }
   </style>
 </head>
 <body>
@@ -99,6 +114,7 @@
   </div>
 
   <script>
+    // (Script 部分保持不變)
     const canvas = document.getElementById("vectorCanvas");
     const ctx = canvas.getContext("2d");
     let width = 0, height = 0, centerX = 0, centerY = 0, scale = 40;
@@ -315,4 +331,3 @@
   </script>
 </body>
 </html>
-
