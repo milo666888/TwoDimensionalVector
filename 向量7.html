@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>向量互動教具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      background: #000; color: #f5f5f5; overflow: hidden;
+    }
+    .app-container { min-height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; }
+    header h1 { margin: 0; font-size: 1.1rem; }
+    main { flex: 1; display: flex; min-height: 0; }
+    .canvas-section { flex: 3; padding: 0.4rem; position: relative; }
+    #vectorCanvas { width: 100%; height: 100%; background: #000; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; }
+
+    .company-logo {
+      position: absolute; left: 20px; bottom: 20px; height: 45px;
+      opacity: 0.9; pointer-events: none; z-index: 10;
+    }
+
+    .control-section { flex: 2; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; }
+    .panel { background: #050505; border-radius: 0.4rem; padding: 0.5rem 0.6rem; border: 1px solid #222; font-size: 0.85rem; }
+    .panel h2 { margin: 0 0 0.35rem; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; }
+    .vector-row { display: grid; grid-template-columns: 50px repeat(4, 1fr); gap: 0.2rem; align-items: center; margin-bottom: 0.25rem; font-size: 0.8rem; }
+    
+    .vec-var {
+      font-family: "Times New Roman", serif; font-style: italic; font-weight: bold;
+      position: relative; display: inline-block; margin-right: 0.1rem;
+    }
+    .vec-var::after {
+      content: "→"; position: absolute; top: -0.6em; left: 50%;
+      transform: translateX(-50%) scaleX(0.85); font-size: 0.9em;
+      font-family: sans-serif; font-style: normal; font-weight: normal;
+    }
+    .color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    input { width: 100%; padding: 0.15rem 0.25rem; background: #111; border: 1px solid #333; color: #f5f5f5; }
+    button { border: none; border-radius: 0.4rem; padding: 0.3rem 0.7rem; cursor: pointer; background: #2563eb; color: #fff; }
+    select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.2rem; }
+    .info-text { font-size: 0.8rem; margin: 0.1rem 0; color: #ccc; display: flex; align-items: center; gap: 0.3rem; }
+
+    @media (max-width: 768px) { main { flex-direction: column; } .canvas-section { height: 45vh; } }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header><h1>向量互動教具</h1></header>
+    <main>
+      <section class="canvas-section">
+        <canvas id="vectorCanvas"></canvas>
+        <img src="company-logo.PNG" alt="LOGO" class="company-logo">
+      </section>
+      <section class="control-section">
+        <div class="panel">
+          <h2>向量輸入</h2>
+          <div class="vector-row">
+            <label><span class="vec-var">A</span> <span class="color-dot" style="background:#60a5fa;"></span></label>
+            <input type="number" step="0.1" id="A_tail_x"> <input type="number" step="0.1" id="A_tail_y">
+            <input type="number" step="0.1" id="A_dx"> <input type="number" step="0.1" id="A_dy">
+          </div>
+          <div class="vector-row">
+            <label><span class="vec-var">B</span> <span class="color-dot" style="background:#4ade80;"></span></label>
+            <input type="number" step="0.1" id="B_tail_x"> <input type="number" step="0.1" id="B_tail_y">
+            <input type="number" step="0.1" id="B_dx"> <input type="number" step="0.1" id="B_dy">
+          </div>
+          <div style="display:flex; gap:0.5rem; margin-top:0.3rem;">
+            <button id="applyInputBtn">套用輸入</button>
+            <button id="resetBtn">重設</button>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>向量運算</h2>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span>運算：</span>
+            <select id="operationSelect">
+              <option value="none">不顯示</option>
+              <option value="AplusB">A + B</option>
+              <option value="BplusA">B + A</option>
+              <option value="AminusB">A - B</option>
+              <option value="BminusA">B - A</option>
+            </select>
+          </div>
+          <div class="info-text" style="margin-top:0.4rem; padding: 0.4rem; background:#111; border-radius:4px;">
+            結果：<span id="addResultText">（未顯示）</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>詳細資訊</h2>
+          <div class="info-text"><strong><span class="vec-var" style="color:#60a5fa">A</span>：</strong><span id="infoA"></span></div>
+          <div class="info-text"><strong><span class="vec-var" style="color:#4ade80">B</span>：</strong><span id="infoB"></span></div>
+          <div class="info-text"><strong><span class="vec-var" style="color:#fb923c">C</span>(橘)：</strong><span id="infoAddVec"></span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("vectorCanvas");
+    const ctx = canvas.getContext("2d");
+    let width = 0, height = 0, centerX = 0, centerY = 0, scale = 40;
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width; height = rect.height;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr; canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      centerX = width / 2; centerY = height / 2;
+      scale = Math.min(width, height) / 10;
+      draw();
+    }
+    window.addEventListener("resize", resizeCanvas);
+
+    const worldToScreen = (x, y) => ({ sx: centerX + x * scale, sy: centerY - y * scale });
+    const screenToWorld = (sx, sy) => ({ x: (sx - centerX) / scale, y: (centerY - sy) / scale });
+
+    const vectors = [
+      { id: "A", tail: { x: 0, y: 0 }, dx: 3, dy: 2, color: "#60a5fa" },
+      { id: "B", tail: { x: 0, y: 0 }, dx: -1, dy: 3, color: "#4ade80" },
+    ];
+    const getVectorById = (id) => vectors.find(v => v.id === id);
+    const f2 = (x) => Math.round(x * 100) / 100;
+    const formatVec = (dx, dy) => `(${f2(dx)}, ${f2(dy)})`;
+
+    function snapToIntIfClose(value) {
+      const r = Math.round(value);
+      return Math.abs(value - r) < 0.25 ? r : value;
+    }
+
+    function syncInputsFromState() {
+      vectors.forEach(v => {
+        document.getElementById(v.id+"_tail_x").value = f2(v.tail.x);
+        document.getElementById(v.id+"_tail_y").value = f2(v.tail.y);
+        document.getElementById(v.id+"_dx").value = f2(v.dx);
+        document.getElementById(v.id+"_dy").value = f2(v.dy);
+      });
+    }
+
+    function applyInputsToState() {
+      vectors.forEach(v => {
+        v.tail.x = parseFloat(document.getElementById(v.id+"_tail_x").value || 0);
+        v.tail.y = parseFloat(document.getElementById(v.id+"_tail_y").value || 0);
+        v.dx = parseFloat(document.getElementById(v.id+"_dx").value || 0);
+        v.dy = parseFloat(document.getElementById(v.id+"_dy").value || 0);
+      });
+      draw();
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = "#222"; ctx.lineWidth = 1; ctx.beginPath();
+      const maxUnitsX = Math.ceil(width / scale); const maxUnitsY = Math.ceil(height / scale);
+      for (let i = -maxUnitsX; i <= maxUnitsX; i++) { const x = centerX + i * scale; ctx.moveTo(x, 0); ctx.lineTo(x, height); }
+      for (let j = -maxUnitsY; j <= maxUnitsY; j++) { const y = centerY + j * scale; ctx.moveTo(0, y); ctx.lineTo(width, y); }
+      ctx.stroke();
+      ctx.strokeStyle = "#888"; ctx.lineWidth = 1.2; ctx.beginPath();
+      ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height);
+      ctx.stroke();
+    }
+
+    function drawVectorName(text, dx, dy, x, y, color) {
+      ctx.save(); ctx.fillStyle = color; ctx.font = "italic bold 15px 'Times New Roman'";
+      ctx.fillText(text, x, y);
+      const tw = ctx.measureText(text).width;
+      ctx.beginPath(); ctx.lineWidth = 1.2; ctx.strokeStyle = color;
+      ctx.moveTo(x, y - 16); ctx.lineTo(x + tw, y - 16);
+      ctx.lineTo(x + tw - 3, y - 19); ctx.stroke();
+      ctx.font = "bold 13px sans-serif"; ctx.fillText(` (${f2(dx)}, ${f2(dy)})`, x + tw, y);
+      ctx.restore();
+    }
+
+    function drawArrow(fx, fy, tx, ty, color, dash = []) {
+      ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash(dash);
+      ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
+      ctx.setLineDash([]);
+      const headlen = 11; const angle = Math.atan2(ty - fy, tx - fx);
+      ctx.beginPath(); ctx.moveTo(tx, ty);
+      ctx.lineTo(tx - headlen * Math.cos(angle - Math.PI/6), ty - headlen * Math.sin(angle - Math.PI/6));
+      ctx.lineTo(tx - headlen * Math.cos(angle + Math.PI/6), ty - headlen * Math.sin(angle + Math.PI/6));
+      ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+
+    function drawVector(vec) {
+      const t = worldToScreen(vec.tail.x, vec.tail.y); const h = worldToScreen(vec.tail.x + vec.dx, vec.tail.y + vec.dy);
+      drawArrow(t.sx, t.sy, h.sx, h.sy, vec.color);
+      drawVectorName(vec.id, vec.dx, vec.dy, (t.sx + h.sx)/2 + 10, (t.sy + h.sy)/2 - 10, vec.color);
+    }
+
+    function drawResultVector() {
+      const op = document.getElementById("operationSelect").value;
+      const resText = document.getElementById("addResultText");
+      if (op === "none") { resText.textContent = "（未顯示）"; return; }
+      const A = getVectorById("A"), B = getVectorById("B");
+      const Ah = { x: A.tail.x + A.dx, y: A.tail.y + A.dy }, Bh = { x: B.tail.x + B.dx, y: B.tail.y + B.dy };
+      const tailsMatch = Math.hypot(A.tail.x - B.tail.x, A.tail.y - B.tail.y) < 0.05;
+      let dxRes, dyRes, labelHtml;
+      const vA = '<span class="vec-var">A</span>', vB = '<span class="vec-var">B</span>';
+
+      if (tailsMatch && (op === "AminusB" || op === "BminusA")) {
+        let start = (op === "AminusB") ? Bh : Ah, end = (op === "AminusB") ? Ah : Bh;
+        labelHtml = (op === "AminusB") ? `${vA} - ${vB}` : `${vB} - ${vA}`;
+        const s = worldToScreen(start.x, start.y), e = worldToScreen(end.x, end.y);
+        drawArrow(s.sx, s.sy, e.sx, e.sy, "#fb923c");
+        dxRes = end.x - start.x; dyRes = end.y - start.y;
+        drawVectorName("C", dxRes, dyRes, (s.sx + e.sx)/2 + 10, (s.sy + e.sy)/2 - 10, "#fb923c");
+      } else {
+        let s, mid, e, hColor;
+        switch (op) {
+          case "AplusB": s=A.tail; mid=Ah; e={x:Ah.x+B.dx, y:Ah.y+B.dy}; labelHtml=`${vA} + ${vB}`; hColor="#4ade80"; break;
+          case "BplusA": s=B.tail; mid=Bh; e={x:Bh.x+A.dx, y:Bh.y+A.dy}; labelHtml=`${vB} + ${vA}`; hColor="#60a5fa"; break;
+          case "AminusB": s=A.tail; mid=Ah; e={x:Ah.x-B.dx, y:Ah.y-B.dy}; labelHtml=`${vA} - ${vB}`; hColor="#4ade80"; break;
+          case "BminusA": s=B.tail; mid=Bh; e={x:Bh.x-A.dx, y:Bh.y-A.dy}; labelHtml=`${vB} - ${vA}`; hColor="#60a5fa"; break;
+        }
+        const ss = worldToScreen(s.x, s.y), ms = worldToScreen(mid.x, mid.y), es = worldToScreen(e.x, e.y);
+        drawArrow(ms.sx, ms.sy, es.sx, es.sy, hColor, [6, 4]);
+        drawArrow(ss.sx, ss.sy, es.sx, es.sy, "#fb923c");
+        dxRes = e.x - s.x; dyRes = e.y - s.y;
+        drawVectorName("C", dxRes, dyRes, (ss.sx + es.sx)/2 + 15, (ss.sy + es.sy)/2 - 15, "#fb923c");
+      }
+      resText.innerHTML = `<span class="vec-var">C</span> = ${labelHtml} = ${formatVec(dxRes, dyRes)}`;
+      document.getElementById("infoAddVec").textContent = `${formatVec(dxRes, dyRes)}, |C|≈${f2(Math.hypot(dxRes, dyRes))}`;
+    }
+
+    function draw() {
+      drawGrid(); vectors.forEach(drawVector); drawResultVector();
+      const A = getVectorById("A"), B = getVectorById("B");
+      document.getElementById("infoA").innerHTML = `起點 (${f2(A.tail.x)}, ${f2(A.tail.y)}), 向量 ${formatVec(A.dx, A.dy)}`;
+      document.getElementById("infoB").innerHTML = `起點 (${f2(B.tail.x)}, ${f2(B.tail.y)}), 向量 ${formatVec(B.dx, B.dy)}`;
+    }
+
+    let draggingState = null;
+    const getEventPos = (evt) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = (evt.touches ? evt.touches[0].clientX : evt.clientX) - rect.left;
+      const y = (evt.touches ? evt.touches[0].clientY : evt.clientY) - rect.top;
+      return { x, y };
+    };
+
+    function dist2(p1, p2) { return (p1.x-p2.x)**2 + (p1.y-p2.y)**2; }
+    function distPointToSegment2(p, a, b) {
+      const vx = b.x - a.x, vy = b.y - a.y, wx = p.x - a.x, wy = p.y - a.y;
+      const c1 = vx*wx + vy*wy; if (c1 <= 0) return dist2(p, a);
+      const c2 = vx*vx + vy*vy; if (c2 <= c1) return dist2(p, b);
+      const t = c1 / c2; return dist2(p, { x: a.x + t*vx, y: a.y + t*vy });
+    }
+
+    function handleDown(evt) {
+      evt.preventDefault(); const pos = getEventPos(evt);
+      for (let i = vectors.length - 1; i >= 0; i--) {
+        const v = vectors[i]; const t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x + v.dx, v.tail.y + v.dy);
+        const tPt = {x: t.sx, y: t.sy}, hPt = {x: h.sx, y: h.sy};
+        if (dist2(pos, tPt) < 400) { draggingState = { vecId: v.id, mode: "tail" }; return; }
+        if (dist2(pos, hPt) < 400) { draggingState = { vecId: v.id, mode: "head" }; return; }
+        if (distPointToSegment2(pos, tPt, hPt) < 400) {
+          draggingState = { vecId: v.id, mode: "move", initTail: {...v.tail}, initClickWorld: screenToWorld(pos.x, pos.y) };
+          return;
+        }
+      }
+    }
+
+    function handleMove(evt) {
+      if (!draggingState) return;
+      evt.preventDefault(); const pos = getEventPos(evt); const wPos = screenToWorld(pos.x, pos.y);
+      const v = getVectorById(draggingState.vecId);
+      const otherV = vectors.find(ov => ov.id !== v.id);
+      const otherHead = { x: otherV.tail.x + otherV.dx, y: otherV.tail.y + otherV.dy };
+
+      const checkSnap = (p) => {
+        if (Math.hypot(p.x - otherV.tail.x, p.y - otherV.tail.y) < 0.3) return { x: otherV.tail.x, y: otherV.tail.y };
+        if (Math.hypot(p.x - otherHead.x, p.y - otherHead.y) < 0.3) return { x: otherHead.x, y: otherHead.y };
+        return { x: snapToIntIfClose(p.x), y: snapToIntIfClose(p.y) };
+      };
+
+      if (draggingState.mode === "tail") {
+        const oh = { x: v.tail.x + v.dx, y: v.tail.y + v.dy };
+        const snapped = checkSnap(wPos);
+        v.tail.x = snapped.x; v.tail.y = snapped.y;
+        v.dx = oh.x - v.tail.x; v.dy = oh.y - v.tail.y;
+      } else if (draggingState.mode === "head") {
+        const snapped = checkSnap(wPos);
+        v.dx = snapped.x - v.tail.x; v.dy = snapped.y - v.tail.y;
+      } else if (draggingState.mode === "move") {
+        const dx = wPos.x - draggingState.initClickWorld.x, dy = wPos.y - draggingState.initClickWorld.y;
+        let newTail = { x: draggingState.initTail.x + dx, y: draggingState.initTail.y + dy };
+        let newHead = { x: newTail.x + v.dx, y: newTail.y + v.dy };
+
+        // 平移時的「雙端點」互吸判定
+        if (Math.hypot(newTail.x - otherV.tail.x, newTail.y - otherV.tail.y) < 0.3) {
+            newTail = { x: otherV.tail.x, y: otherV.tail.y };
+        } else if (Math.hypot(newTail.x - otherHead.x, newTail.y - otherHead.y) < 0.3) {
+            newTail = { x: otherHead.x, y: otherHead.y };
+        } else if (Math.hypot(newHead.x - otherV.tail.x, newHead.y - otherV.tail.y) < 0.3) {
+            newTail = { x: otherV.tail.x - v.dx, y: otherV.tail.y - v.dy };
+        } else if (Math.hypot(newHead.x - otherHead.x, newHead.y - otherHead.y) < 0.3) {
+            newTail = { x: otherHead.x - v.dx, y: otherHead.y - v.dy };
+        } else {
+            newTail.x = snapToIntIfClose(newTail.x); newTail.y = snapToIntIfClose(newTail.y);
+        }
+        v.tail.x = newTail.x; v.tail.y = newTail.y;
+      }
+      syncInputsFromState(); draw();
+    }
+
+    canvas.addEventListener("mousedown", handleDown); canvas.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", () => draggingState = null);
+    canvas.addEventListener("touchstart", handleDown, { passive: false }); canvas.addEventListener("touchmove", handleMove, { passive: false });
+    document.getElementById("applyInputBtn").onclick = applyInputsToState;
+    document.getElementById("resetBtn").onclick = () => location.reload();
+    document.getElementById("operationSelect").onchange = draw;
+    syncInputsFromState(); resizeCanvas();
+  </script>
+</body>
+</html>
