@@ -11,42 +11,33 @@
       background: #000; color: #f5f5f5; overflow: hidden; width: 100vw; height: 100vh;
     }
     .app-container { height: 100vh; display: flex; flex-direction: column; }
-    header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
-    header h1 { margin: 0; font-size: 1.1rem; }
+    header { padding: 0.4rem 0.8rem; background: #050505; border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
+    header h1 { margin: 0; font-size: 1rem; }
     main { flex: 1; display: flex; min-height: 0; position: relative; }
     
-    /* --- 電腦版佈局 --- */
+    /* --- 電腦版佈局調整 (收緊空間) --- */
     .canvas-section { flex: 3; position: relative; background: #000; overflow: hidden; }
     #vectorCanvas { width: 100%; height: 100%; background: #000; display: block; touch-action: none; }
-    .company-logo { position: absolute; left: 20px; bottom: 20px; height: 45px; opacity: 0.9; pointer-events: none; z-index: 50; }
+    .company-logo { position: absolute; left: 15px; bottom: 15px; height: 40px; opacity: 0.9; pointer-events: none; z-index: 50; }
 
-    .control-section { flex: 2; padding: 0.8rem; display: flex; flex-direction: column; gap: 0.6rem; overflow-y: auto; background: #000; border-left: 1px solid #333; }
-    .panel { background: #050505; border-radius: 0.4rem; padding: 0.6rem 0.8rem; border: 1px solid #222; font-size: 0.85rem; }
-    .panel h2 { margin: 0 0 0.4rem; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; color: #eee; }
+    .control-section { flex: 1.2; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; background: #000; border-left: 1px solid #333; }
+    .panel { background: #050505; border-radius: 0.3rem; padding: 0.4rem 0.6rem; border: 1px solid #222; font-size: 0.8rem; }
+    .panel h2 { margin: 0 0 0.3rem; font-size: 0.85rem; border-bottom: 1px solid #333; padding-bottom: 0.15rem; color: #ddd; }
     
-    /* 面板文字向量符號樣式 (修正重疊：增加 padding 並調高符號位置) */
-    .vec-var { 
-      font-family: "Times New Roman", serif; font-style: italic; font-weight: bold; 
-      position: relative; display: inline-flex; align-items: center; 
-      padding-top: 0.6em; /* 增加上方空間防止重疊 */
-    }
-    .vec-var::after { 
-      content: "⇀"; position: absolute; 
-      top: -0.35em; /* 調高符號位置 */
-      left: 50%; transform: translateX(-50%); 
-      font-size: 1.2em; font-weight: normal; 
-    }
+    /* 向量符號 ⇀ */
+    .vec-var { font-family: "Times New Roman", serif; font-style: italic; font-weight: bold; position: relative; display: inline-flex; align-items: center; padding-top: 0.3em; }
+    .vec-var::after { content: "⇀"; position: absolute; top: -0.3em; left: 50%; transform: translateX(-50%); font-size: 1.1em; font-weight: normal; }
 
-    .vector-row { display: grid; grid-template-columns: 70px repeat(4, 1fr); gap: 0.3rem; align-items: center; margin-bottom: 0.4rem; font-size: 0.8rem; }
-    .label-box { display: flex; align-items: center; gap: 5px; }
+    .vector-row { display: grid; grid-template-columns: 60px repeat(4, 1fr); gap: 0.2rem; align-items: center; margin-bottom: 0.3rem; font-size: 0.75rem; }
+    .label-box { display: flex; align-items: center; gap: 4px; }
+    .color-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
     
-    .color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
-    input { width: 100%; padding: 0.2rem 0.3rem; background: #111; border: 1px solid #333; color: #f5f5f5; border-radius: 3px; }
-    button { border: none; border-radius: 0.3rem; padding: 0.4rem 0.8rem; cursor: pointer; background: #2563eb; color: #fff; }
-    select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.3rem; width: 100%; }
-    .result-display { margin-top: 0.4rem; padding: 0.6rem; background: #111; border-radius: 0.3rem; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; border: 1px solid #222; }
+    input { width: 100%; padding: 0.15rem 0.25rem; background: #111; border: 1px solid #333; color: #f5f5f5; border-radius: 2px; font-size: 0.75rem; }
+    button { border: none; border-radius: 0.2rem; padding: 0.3rem 0.6rem; cursor: pointer; background: #2563eb; color: #fff; font-size: 0.75rem; }
+    select { background: #111; color: #f5f5f5; border-radius: 0.2rem; border: 1px solid #333; padding: 0.2rem; width: 100%; font-size: 0.75rem; }
     
-    .info-line { margin: 0.5rem 0; font-size: 0.85rem; color: #ccc; border-bottom: 1px solid #222; padding-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+    .result-display { margin-top: 0.3rem; padding: 0.4rem; background: #111; border-radius: 0.2rem; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; border: 1px solid #222; }
+    .info-line { margin: 0.3rem 0; font-size: 0.75rem; color: #bbb; border-bottom: 1px solid #1a1a1a; padding-bottom: 3px; display: flex; align-items: center; gap: 6px; }
 
     #mobileSettingsBtn { display: none; }
     .close-menu { display: none; }
@@ -55,26 +46,21 @@
     @media (max-width: 768px) {
       .canvas-section { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; padding: 0; }
       #vectorCanvas { border-radius: 0; }
-      
-      /* LOGO 與 ⚙️ 並列右下角 */
-      .company-logo { position: fixed; left: auto; right: 15px; bottom: 15px; height: 38px; z-index: 90; opacity: 1; }
+      .company-logo { position: fixed; left: auto; right: 15px; bottom: 15px; height: 35px; z-index: 90; opacity: 1; }
       #mobileSettingsBtn {
-        display: flex; position: fixed;
-        right: 65px; bottom: 15px; /* 與 LOGO 並列 */
-        width: 38px; height: 38px; background: #2563eb; border-radius: 50%;
+        display: flex; position: fixed; right: 60px; bottom: 15px;
+        width: 35px; height: 35px; background: #2563eb; border-radius: 50%;
         align-items: center; justify-content: center; z-index: 110;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.6); cursor: pointer; font-size: 1.4rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.6); cursor: pointer; font-size: 1.2rem;
       }
-
       .control-section {
         position: fixed; bottom: 0; left: 0; width: 100%; height: 80vh;
-        z-index: 200; border-left: none; border-top: 1px solid #444;
-        transform: translateY(100%); padding: 1.2rem; border-radius: 1.5rem 1.5rem 0 0;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 200; border-left: none; transform: translateY(100%);
+        padding: 1rem; border-radius: 1.2rem 1.2rem 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
+        transition: transform 0.3s ease-out;
       }
       .control-section.active { transform: translateY(0); }
-      .close-menu { display: block; text-align: center; padding: 0.8rem; margin-bottom: 1.2rem; background: #333; border-radius: 0.8rem; color: #fff; font-weight: bold; border: 1px solid #555; }
+      .close-menu { display: block; text-align: center; padding: 0.6rem; margin-bottom: 1rem; background: #222; border-radius: 0.5rem; color: #fff; font-weight: bold; font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -90,7 +76,7 @@
       <div id="mobileSettingsBtn">⚙️</div>
 
       <section class="control-section" id="controlPanel">
-        <div class="close-menu" id="closeMenuBtn">確認並關閉選單 ✕</div>
+        <div class="close-menu" id="closeMenuBtn">確認並關閉 ✕</div>
         
         <div class="panel">
           <h2>向量輸入 (起點, 向量)</h2>
@@ -104,7 +90,7 @@
             <input type="number" step="0.1" id="B_tail_x"> <input type="number" step="0.1" id="B_tail_y">
             <input type="number" step="0.1" id="B_dx"> <input type="number" step="0.1" id="B_dy">
           </div>
-          <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+          <div style="display:flex; gap:0.4rem; margin-top:0.4rem;">
             <button id="applyInputBtn" style="flex:1;">套用修改</button>
             <button id="resetBtn">重設</button>
           </div>
@@ -121,7 +107,7 @@
           </select>
           <div class="result-display">
             <span class="color-dot" id="resultDot" style="background:#fb923c; display:none;"></span>
-            <span id="addResultText">（未開啟運算）</span>
+            <span id="addResultText">（未開啟）</span>
           </div>
         </div>
 
@@ -166,36 +152,44 @@
       { id: "B", tail: { x: 0, y: 0 }, dx: -1, dy: 3, color: "#4ade80" },
     ];
     const f2 = (x) => Math.round(x * 100) / 100;
-    const snap = (v) => (Math.abs(v - Math.round(v)) < 0.25 ? Math.round(v) : v);
 
-    // [修正] 加高畫布標籤上的向量符號位置
+    // --- 智慧磁吸邏輯 (維持向量大小，僅平移) ---
+    const SNAP_TOL = 0.25; 
+    function getSnappedPos(targetWorldPos, otherV) {
+      let finalPos = { x: targetWorldPos.x, y: targetWorldPos.y };
+      
+      // 1. 與另一向量的端點吸附 (優先權高)
+      const otherHead = { x: otherV.tail.x + otherV.dx, y: otherV.tail.y + otherV.dy };
+      if (Math.hypot(finalPos.x - otherV.tail.x, finalPos.y - otherV.tail.y) < SNAP_TOL) {
+        return { x: otherV.tail.x, y: otherV.tail.y };
+      }
+      if (Math.hypot(finalPos.x - otherHead.x, finalPos.y - otherHead.y) < SNAP_TOL) {
+        return { x: otherHead.x, y: otherHead.y };
+      }
+
+      // 2. 整數網格吸附
+      if (Math.abs(finalPos.x - Math.round(finalPos.x)) < SNAP_TOL) finalPos.x = Math.round(finalPos.x);
+      if (Math.abs(finalPos.y - Math.round(finalPos.y)) < SNAP_TOL) finalPos.y = Math.round(finalPos.y);
+      
+      return finalPos;
+    }
+
     function drawVectorLabel(text, dx, dy, tx, ty, hx, hy, color) {
       ctx.save();
-      const midX = (tx + hx) / 2;
-      const midY = (ty + hy) / 2;
-      const angle = Math.atan2(hy - ty, hx - tx);
-      
-      const offset = 28; // 稍微增加偏移量
-      const lx = midX + Math.cos(angle - Math.PI / 2) * offset;
-      const ly = midY + Math.sin(angle - Math.PI / 2) * offset;
+      const midX = (tx + hx) / 2, midY = (ty + hy) / 2;
+      const ang = Math.atan2(hy - ty, hx - tx);
+      const lx = midX + Math.cos(ang - Math.PI / 2) * 28;
+      const ly = midY + Math.sin(ang - Math.PI / 2) * 28;
 
-      ctx.fillStyle = color;
-      ctx.font = "italic bold 17px 'Times New Roman'";
-      ctx.textAlign = "center";
+      ctx.fillStyle = color; ctx.font = "italic bold 17px 'Times New Roman'"; ctx.textAlign = "center";
       ctx.fillText(text, lx, ly);
 
-      // 手畫單邊勾 ⇀ (修正：將符號位置再往上移，sy 改為 ly - 21)
       const charW = ctx.measureText(text).width;
-      const sx = lx - charW/2;
-      const sy = ly - 21; 
-      ctx.strokeStyle = color; ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy); ctx.lineTo(sx + 12, sy);
-      ctx.lineTo(sx + 8, sy - 3);
-      ctx.stroke();
+      const sx = lx - charW/2, sy = ly - 21;
+      ctx.strokeStyle = color; ctx.lineWidth = 1.2; ctx.beginPath();
+      ctx.moveTo(sx, sy); ctx.lineTo(sx + 12, sy); ctx.lineTo(sx + 8, sy - 3); ctx.stroke();
 
-      ctx.font = "bold 13px sans-serif";
-      ctx.textAlign = "left";
+      ctx.font = "bold 13px sans-serif"; ctx.textAlign = "left";
       ctx.fillText(`(${f2(dx)}, ${f2(dy)})`, lx + charW/2 + 3, ly);
       ctx.restore();
     }
@@ -216,8 +210,7 @@
     function getInfoLine(id, color, dx, dy) {
       const dot = `<span class="color-dot" style="background:${color}"></span>`;
       const name = `<span class="vec-var" style="color:${color}">${id}</span>`;
-      const length = f2(Math.hypot(dx, dy));
-      return `${dot} ${name}：向量 (${f2(dx)}, ${f2(dy)}), 長度 ${length}`;
+      return `${dot} ${name}：向量 (${f2(dx)}, ${f2(dy)}), 長度 ${f2(Math.hypot(dx, dy))}`;
     }
 
     function draw() {
@@ -234,15 +227,11 @@
       ctx.stroke();
 
       const op = document.getElementById("operationSelect").value;
-      const resDot = document.getElementById("resultDot");
-      const resText = document.getElementById("addResultText");
-      
+      const resDot = document.getElementById("resultDot"), resText = document.getElementById("addResultText");
       const A = vectors[0], B = vectors[1];
-      const tA = worldToScreen(A.tail.x, A.tail.y), hA = worldToScreen(A.tail.x + A.dx, A.tail.y + A.dy);
-      const tB = worldToScreen(B.tail.x, B.tail.y), hB = worldToScreen(B.tail.x + B.dx, B.tail.y + B.dy);
       
-      drawArrow(tA.sx, tA.sy, hA.sx, hA.sy, A.color, A.id, A.dx, A.dy);
-      drawArrow(tB.sx, tB.sy, hB.sx, hB.sy, B.color, B.id, B.dx, B.dy);
+      drawArrow(worldToScreen(A.tail.x, A.tail.y).sx, worldToScreen(A.tail.x, A.tail.y).sy, worldToScreen(A.tail.x+A.dx, A.tail.y+A.dy).sx, worldToScreen(A.tail.x+A.dx, A.tail.y+A.dy).sy, A.color, A.id, A.dx, A.dy);
+      drawArrow(worldToScreen(B.tail.x, B.tail.y).sx, worldToScreen(B.tail.x, B.tail.y).sy, worldToScreen(B.tail.x+B.dx, B.tail.y+B.dy).sx, worldToScreen(B.tail.x+B.dx, B.tail.y+B.dy).sy, B.color, B.id, B.dx, B.dy);
       
       document.getElementById("infoA").innerHTML = getInfoLine("A", A.color, A.dx, A.dy);
       document.getElementById("infoB").innerHTML = getInfoLine("B", B.color, B.dx, B.dy);
@@ -253,11 +242,9 @@
         let s, e, mid, hCol, labelText;
         const Ah = { x: A.tail.x + A.dx, y: A.tail.y + A.dy }, Bh = { x: B.tail.x + B.dx, y: B.tail.y + B.dy };
         const coincides = Math.hypot(A.tail.x - B.tail.x, A.tail.y - B.tail.y) < 0.1;
-
         if (coincides && (op === "AminusB" || op === "BminusA")) {
           if (op === "AminusB") { s = Bh; e = Ah; labelText = `${vA} - ${vB}`; } else { s = Ah; e = Bh; labelText = `${vB} - ${vA}`; }
-          const ss = worldToScreen(s.x, s.y), es = worldToScreen(e.x, e.y);
-          drawArrow(ss.sx, ss.sy, es.sx, es.sy, "#fb923c", "C", e.x-s.x, e.y-s.y);
+          drawArrow(worldToScreen(s.x, s.y).sx, worldToScreen(s.x, s.y).sy, worldToScreen(e.x, e.y).sx, worldToScreen(e.x, e.y).sy, "#fb923c", "C", e.x-s.x, e.y-s.y);
         } else {
           switch(op) {
             case "AplusB": s=A.tail; mid=Ah; e={x:Ah.x+B.dx, y:Ah.y+B.dy}; labelText=`${vA} + ${vB}`; hCol="#4ade80"; break;
@@ -265,20 +252,18 @@
             case "AminusB": s=A.tail; mid=Ah; e={x:Ah.x-B.dx, y:Ah.y-B.dy}; labelText=`${vA} - ${vB}`; hCol="#4ade80"; break;
             case "BminusA": s=B.tail; mid=Bh; e={x:Bh.x-A.dx, y:Bh.y-A.dy}; labelText=`${vB} - ${vA}`; hCol="#60a5fa"; break;
           }
-          const ss=worldToScreen(s.x, s.y), ms=worldToScreen(mid.x, mid.y), es=worldToScreen(e.x, e.y);
-          drawArrow(ms.sx, ms.sy, es.sx, es.sy, hCol, "", e.x-mid.x, e.y-mid.y, [5, 5]);
-          drawArrow(ss.sx, ss.sy, es.sx, es.sy, "#fb923c", "C", e.x-s.x, e.y-s.y);
+          drawArrow(worldToScreen(mid.x, mid.y).sx, worldToScreen(mid.x, mid.y).sy, worldToScreen(e.x, e.y).sx, worldToScreen(e.x, e.y).sy, hCol, "", e.x-mid.x, e.y-mid.y, [5, 5]);
+          drawArrow(worldToScreen(s.x, s.y).sx, worldToScreen(s.x, s.y).sy, worldToScreen(e.x, e.y).sx, worldToScreen(e.x, e.y).sy, "#fb923c", "C", e.x-s.x, e.y-s.y);
         }
-        const finalX = e.x - s.x, finalY = e.y - s.y;
-        resText.innerHTML = `<span class="vec-var">C</span> = ${labelText} = (${f2(finalX)}, ${f2(finalY)})`;
-        document.getElementById("infoC").innerHTML = getInfoLine("C", "#fb923c", finalX, finalY);
+        resText.innerHTML = `<span class="vec-var">C</span> = ${labelText} = (${f2(e.x-s.x)}, ${f2(e.y-s.y)})`;
+        document.getElementById("infoC").innerHTML = getInfoLine("C", "#fb923c", e.x-s.x, e.y-s.y);
       } else {
         resDot.style.display = "none"; resText.textContent = "（未開啟運算）";
         document.getElementById("infoC").innerHTML = "";
       }
     }
 
-    // --- 拖拉互動 ---
+    // --- 改進的拖拉系統 (全平移磁吸) ---
     let drag = null;
     function getPos(e) {
       const r = canvas.getBoundingClientRect();
@@ -290,8 +275,8 @@
       const p = getPos(e); const tol = 30 * 30;
       for (let i = 1; i >= 0; i--) {
         const v = vectors[i], t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x+v.dx, v.tail.y+v.dy);
-        if ((p.x-t.sx)**2 + (p.y-t.sy)**2 < tol) { drag = { id: v.id, mode: "tail" }; break; }
-        if ((p.x-h.sx)**2 + (p.y-h.sy)**2 < tol) { drag = { id: v.id, mode: "head" }; break; }
+        if ((p.x-t.sx)**2 + (p.y-t.sy)**2 < tol) { drag = { id: v.id, mode: "tail", offset: screenToWorld(p.x, p.y) }; break; }
+        if ((p.x-h.sx)**2 + (p.y-h.sy)**2 < tol) { drag = { id: v.id, mode: "head", offset: screenToWorld(p.x, p.y) }; break; }
         const mx = (t.sx+h.sx)/2, my = (t.sy+h.sy)/2;
         if ((p.x-mx)**2 + (p.y-my)**2 < tol * 2) { drag = { id: v.id, mode: "move", offset: screenToWorld(p.x, p.y), oTail: {...v.tail} }; break; }
       }
@@ -300,9 +285,23 @@
       if (!drag) return; e.preventDefault();
       const w = screenToWorld(getPos(e).x, getPos(e).y);
       const v = vectors.find(vec => vec.id === drag.id);
-      if (drag.mode === "tail") { const head = { x: v.tail.x + v.dx, y: v.tail.y + v.dy }; v.tail.x = snap(w.x); v.tail.y = snap(w.y); v.dx = head.x - v.tail.x; v.dy = head.y - v.tail.y; }
-      else if (drag.mode === "head") { v.dx = snap(w.x - v.tail.x); v.dy = snap(w.y - v.tail.y); }
-      else if (drag.mode === "move") { v.tail.x = snap(drag.oTail.x + (w.x - drag.offset.x)); v.tail.y = snap(drag.oTail.y + (w.y - drag.offset.y)); }
+      const otherV = vectors.find(vec => vec.id !== drag.id);
+      
+      if (drag.mode === "tail" || drag.mode === "head") {
+        // 先算出沒磁吸前，該點應該在的位置
+        let targetPoint = (drag.mode === "tail") ? {x: w.x, y: w.y} : {x: w.x, y: w.y};
+        // 取得磁吸後的世界座標
+        const snapped = getSnappedPos(targetPoint, otherV);
+        // 核心：透過移動起點來達到磁吸，不改變向量分量
+        v.tail.x = snapped.x - (drag.mode === "head" ? v.dx : 0);
+        v.tail.y = snapped.y - (drag.mode === "head" ? v.dy : 0);
+      } else if (drag.mode === "move") {
+        v.tail.x = drag.oTail.x + (w.x - drag.offset.x);
+        v.tail.y = drag.oTail.y + (w.y - drag.offset.y);
+        // 移動模式也加入整數點磁吸
+        if (Math.abs(v.tail.x - Math.round(v.tail.x)) < SNAP_TOL) v.tail.x = Math.round(v.tail.x);
+        if (Math.abs(v.tail.y - Math.round(v.tail.y)) < SNAP_TOL) v.tail.y = Math.round(v.tail.y);
+      }
       syncInputsFromState(); draw();
     });
     window.addEventListener("mouseup", () => drag = null);
@@ -328,7 +327,6 @@
         document.getElementById(v.id+"_dx").value = f2(v.dx); document.getElementById(v.id+"_dy").value = f2(v.dy);
       });
     }
-
     resizeCanvas(); syncInputsFromState();
   </script>
 </body>
