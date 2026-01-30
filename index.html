@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <title>向量互動教具</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
       background: #000; color: #f5f5f5; overflow: hidden;
+      width: 100vw; height: 100vh;
     }
-    .app-container { min-height: 100vh; display: flex; flex-direction: column; }
-    header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; z-index: 10; }
+    .app-container { height: 100vh; display: flex; flex-direction: column; }
+    header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; z-index: 10; flex-shrink: 0; }
     header h1 { margin: 0; font-size: 1.1rem; }
+    
     main { flex: 1; display: flex; min-height: 0; position: relative; }
     
-    /* 向量圖區域 (電腦版預設) */
-    .canvas-section { flex: 3; padding: 0.4rem; position: relative; background: #000; }
-    #vectorCanvas { width: 100%; height: 100%; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; }
+    /* 向量圖區域 - 電腦版預設 */
+    .canvas-section { flex: 3; position: relative; background: #000; overflow: hidden; }
+    #vectorCanvas { width: 100%; height: 100%; display: block; }
 
-    /* 控制面板 (電腦版預設) */
-    .control-section { flex: 2; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; background: #000; transition: transform 0.3s ease; }
+    /* 控制面板 - 電腦版預設並列 */
+    .control-section { flex: 2; padding: 0.6rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; background: #000; border-left: 1px solid #333; }
     .panel { background: #050505; border-radius: 0.4rem; padding: 0.5rem 0.6rem; border: 1px solid #222; font-size: 0.85rem; }
     .panel h2 { margin: 0 0 0.35rem; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; }
     .vector-row { display: grid; grid-template-columns: 50px repeat(4, 1fr); gap: 0.2rem; align-items: center; margin-bottom: 0.25rem; font-size: 0.8rem; }
     
-    /* 向量變數符號樣式 */
     .vec-var {
       font-family: "Times New Roman", serif; font-style: italic; font-weight: bold;
       position: relative; display: inline-block; margin-right: 0.1rem;
@@ -37,55 +38,48 @@
       font-family: sans-serif; font-style: normal; font-weight: normal;
     }
     .color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    input { width: 100%; padding: 0.15rem 0.25rem; background: #111; border: 1px solid #333; color: #f5f5f5; }
-    button { border: none; border-radius: 0.4rem; padding: 0.3rem 0.7rem; cursor: pointer; background: #2563eb; color: #fff; }
-    select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.2rem; }
+    input { width: 100%; padding: 0.2rem 0.25rem; background: #111; border: 1px solid #333; color: #f5f5f5; }
+    button { border: none; border-radius: 0.4rem; padding: 0.4rem 0.7rem; cursor: pointer; background: #2563eb; color: #fff; }
+    select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.3rem; }
     .info-text { font-size: 0.8rem; margin: 0.1rem 0; color: #ccc; display: flex; align-items: center; gap: 0.3rem; }
 
-    /* 電腦版 LOGO 定位：左下角 */
     .company-logo {
       position: absolute; left: 20px; bottom: 20px; height: 40px;
       opacity: 0.8; pointer-events: none; z-index: 5;
     }
 
-    /* 隱藏手機設定按鈕 (電腦版不顯示) */
     #mobileSettingsBtn { display: none; }
 
-    /* --- 手機版專屬樣式 (不影響電腦版) --- */
+    /* --- 手機版專屬樣式 --- */
     @media (max-width: 768px) {
-      /* 讓畫布填滿整個主畫面 */
-      .canvas-section { flex: 1; height: 100%; padding: 0; }
-      #vectorCanvas { border-radius: 0; }
-
-      /* LOGO 固定在螢幕最右下角並縮小 */
+      .canvas-section { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        z-index: 1; 
+      }
+      
       .company-logo {
         position: fixed; left: auto; right: 15px; bottom: 15px;
-        height: 25px; z-index: 90; opacity: 1;
+        height: 22px; z-index: 90; opacity: 1;
       }
 
-      /* 設定按鈕 (⚙️)：放在 LOGO 上方 */
       #mobileSettingsBtn {
-        display: flex; position: fixed; right: 15px; bottom: 50px;
-        width: 45px; height: 45px; background: #2563eb; border-radius: 50%;
+        display: flex; position: fixed; right: 15px; bottom: 45px;
+        width: 48px; height: 48px; background: #2563eb; border-radius: 50%;
         align-items: center; justify-content: center; z-index: 100;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer; font-size: 1.4rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.6); cursor: pointer; font-size: 1.6rem;
       }
 
-      /* 手機版選單：彈出式遮罩 */
       .control-section {
         position: fixed; bottom: 0; left: 0; width: 100%; height: 75vh;
-        z-index: 200; background: #0a0a0a; border-top: 2px solid #333;
-        transform: translateY(100%); /* 預設藏在下方 */
-        padding: 1.2rem 1rem; border-radius: 1.2rem 1.2rem 0 0;
-        box-shadow: 0 -5px 25px rgba(0,0,0,0.8);
+        z-index: 200; border-left: none; border-top: 1px solid #444;
+        transform: translateY(100%); padding: 1.2rem; border-radius: 1.2rem 1.2rem 0 0;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.9);
       }
       .control-section.active { transform: translateY(0); }
 
-      /* 選單頂部的關閉按鈕 */
       .close-menu {
-        display: block; text-align: center; padding: 0.6rem; margin-bottom: 1rem;
-        background: #222; border-radius: 0.5rem; color: #fff; cursor: pointer;
-        font-weight: bold; border: 1px solid #444;
+        display: block; text-align: center; padding: 0.8rem; margin-bottom: 1rem;
+        background: #333; border-radius: 0.6rem; color: #fff; font-weight: bold;
       }
     }
   </style>
@@ -105,7 +99,7 @@
         <div class="close-menu" id="closeMenuBtn">確認並關閉選單 ✕</div>
         
         <div class="panel">
-          <h2>向量輸入 (起點, 向量分量)</h2>
+          <h2>向量輸入 (起點, 分量)</h2>
           <div class="vector-row">
             <label><span class="vec-var">A</span> <span class="color-dot" style="background:#60a5fa;"></span></label>
             <input type="number" step="0.1" id="A_tail_x"> <input type="number" step="0.1" id="A_tail_y">
@@ -116,21 +110,21 @@
             <input type="number" step="0.1" id="B_tail_x"> <input type="number" step="0.1" id="B_tail_y">
             <input type="number" step="0.1" id="B_dx"> <input type="number" step="0.1" id="B_dy">
           </div>
-          <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+          <div style="display:flex; gap:0.5rem; margin-top:0.6rem;">
             <button id="applyInputBtn" style="flex:1;">套用修改</button>
             <button id="resetBtn">重設</button>
           </div>
         </div>
 
         <div class="panel">
-          <h2>向量運算模式</h2>
+          <h2>向量運算</h2>
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span>模式：</span>
             <select id="operationSelect" style="flex:1;">
               <option value="none">不顯示運算</option>
-              <option value="AplusB">A + B (合成)</option>
+              <option value="AplusB">A + B</option>
               <option value="BplusA">B + A</option>
-              <option value="AminusB">A - B (差)</option>
+              <option value="AminusB">A - B</option>
               <option value="BminusA">B - A</option>
             </select>
           </div>
@@ -140,7 +134,7 @@
         </div>
 
         <div class="panel">
-          <h2>詳細座標資訊</h2>
+          <h2>詳細資訊</h2>
           <div class="info-text"><strong><span class="vec-var" style="color:#60a5fa">A</span>：</strong><span id="infoA"></span></div>
           <div class="info-text"><strong><span class="vec-var" style="color:#4ade80">B</span>：</strong><span id="infoB"></span></div>
           <div class="info-text"><strong><span class="vec-var" style="color:#fb923c">C</span>(橘)：</strong><span id="infoAddVec"></span></div>
@@ -150,7 +144,6 @@
   </div>
 
   <script>
-    // --- 選單互動邏輯 ---
     const settingsBtn = document.getElementById('mobileSettingsBtn');
     const closeBtn = document.getElementById('closeMenuBtn');
     const panel = document.getElementById('controlPanel');
@@ -158,18 +151,18 @@
     settingsBtn.onclick = () => panel.classList.add('active');
     closeBtn.onclick = () => panel.classList.remove('active');
 
-    // --- 繪圖核心邏輯 ---
     const canvas = document.getElementById("vectorCanvas");
     const ctx = canvas.getContext("2d");
     let width = 0, height = 0, centerX = 0, centerY = 0, scale = 40;
 
     function resizeCanvas() {
-      const rect = canvas.getBoundingClientRect();
+      const rect = canvas.parentNode.getBoundingClientRect();
       width = rect.width; height = rect.height;
       const dpr = window.devicePixelRatio || 1;
       canvas.width = width * dpr; canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       centerX = width / 2; centerY = height / 2;
+      // 加大手機版的縮放比例，讓座標軸格線看起來更清楚
       scale = Math.min(width, height) / 10;
       draw();
     }
@@ -213,7 +206,8 @@
     function drawGrid() {
       ctx.clearRect(0, 0, width, height);
       ctx.strokeStyle = "#222"; ctx.lineWidth = 1; ctx.beginPath();
-      const maxUnitsX = Math.ceil(width / scale); const maxUnitsY = Math.ceil(height / scale);
+      const maxUnitsX = Math.ceil(width / scale / 2) + 2; 
+      const maxUnitsY = Math.ceil(height / scale / 2) + 2;
       for (let i = -maxUnitsX; i <= maxUnitsX; i++) { const x = centerX + i * scale; ctx.moveTo(x, 0); ctx.lineTo(x, height); }
       for (let j = -maxUnitsY; j <= maxUnitsY; j++) { const y = centerY + j * scale; ctx.moveTo(0, y); ctx.lineTo(width, y); }
       ctx.stroke();
@@ -234,10 +228,10 @@
     }
 
     function drawArrow(fx, fy, tx, ty, color, dash = []) {
-      ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash(dash);
+      ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.8; ctx.setLineDash(dash);
       ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
       ctx.setLineDash([]);
-      const headlen = 11; const angle = Math.atan2(ty - fy, tx - fx);
+      const headlen = 12; const angle = Math.atan2(ty - fy, tx - fx);
       ctx.beginPath(); ctx.moveTo(tx, ty);
       ctx.lineTo(tx - headlen * Math.cos(angle - Math.PI/6), ty - headlen * Math.sin(angle - Math.PI/6));
       ctx.lineTo(tx - headlen * Math.cos(angle + Math.PI/6), ty - headlen * Math.sin(angle + Math.PI/6));
@@ -314,9 +308,9 @@
       for (let i = vectors.length - 1; i >= 0; i--) {
         const v = vectors[i]; const t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x + v.dx, v.tail.y + v.dy);
         const tPt = {x: t.sx, y: t.sy}, hPt = {x: h.sx, y: h.sy};
-        if (dist2(pos, tPt) < 900) { draggingState = { vecId: v.id, mode: "tail" }; return; }
-        if (dist2(pos, hPt) < 900) { draggingState = { vecId: v.id, mode: "head" }; return; }
-        if (distPointToSegment2(pos, tPt, hPt) < 900) {
+        if (dist2(pos, tPt) < 1200) { draggingState = { vecId: v.id, mode: "tail" }; return; }
+        if (dist2(pos, hPt) < 1200) { draggingState = { vecId: v.id, mode: "head" }; return; }
+        if (distPointToSegment2(pos, tPt, hPt) < 1200) {
           draggingState = { vecId: v.id, mode: "move", initTail: {...v.tail}, initClickWorld: screenToWorld(pos.x, pos.y) };
           return;
         }
@@ -331,8 +325,8 @@
       const otherHead = { x: otherV.tail.x + otherV.dx, y: otherV.tail.y + otherV.dy };
 
       const checkSnap = (p) => {
-        if (Math.hypot(p.x - otherV.tail.x, p.y - otherV.tail.y) < 0.3) return { x: otherV.tail.x, y: otherV.tail.y };
-        if (Math.hypot(p.x - otherHead.x, p.y - otherHead.y) < 0.3) return { x: otherHead.x, y: otherHead.y };
+        if (Math.hypot(p.x - otherV.tail.x, p.y - otherV.tail.y) < 0.4) return { x: otherV.tail.x, y: otherV.tail.y };
+        if (Math.hypot(p.x - otherHead.x, p.y - otherHead.y) < 0.4) return { x: otherHead.x, y: otherHead.y };
         return { x: snapToIntIfClose(p.x), y: snapToIntIfClose(p.y) };
       };
 
@@ -348,13 +342,13 @@
         const dx = wPos.x - draggingState.initClickWorld.x, dy = wPos.y - draggingState.initClickWorld.y;
         let newTail = { x: draggingState.initTail.x + dx, y: draggingState.initTail.y + dy };
         let newHead = { x: newTail.x + v.dx, y: newTail.y + v.dy };
-        if (Math.hypot(newTail.x - otherV.tail.x, newTail.y - otherV.tail.y) < 0.3) {
+        if (Math.hypot(newTail.x - otherV.tail.x, newTail.y - otherV.tail.y) < 0.4) {
             newTail = { x: otherV.tail.x, y: otherV.tail.y };
-        } else if (Math.hypot(newTail.x - otherHead.x, newTail.y - otherHead.y) < 0.3) {
+        } else if (Math.hypot(newTail.x - otherHead.x, newTail.y - otherHead.y) < 0.4) {
             newTail = { x: otherHead.x, y: otherHead.y };
-        } else if (Math.hypot(newHead.x - otherV.tail.x, newHead.y - otherV.tail.y) < 0.3) {
+        } else if (Math.hypot(newHead.x - otherV.tail.x, newHead.y - otherV.tail.y) < 0.4) {
             newTail = { x: otherV.tail.x - v.dx, y: otherV.tail.y - v.dy };
-        } else if (Math.hypot(newHead.x - otherHead.x, newHead.y - otherHead.y) < 0.3) {
+        } else if (Math.hypot(newHead.x - otherHead.x, newHead.y - otherHead.y) < 0.4) {
             newTail = { x: otherHead.x - v.dx, y: otherHead.y - v.dy };
         } else {
             newTail.x = snapToIntIfClose(newTail.x); newTail.y = snapToIntIfClose(newTail.y);
