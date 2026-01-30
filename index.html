@@ -7,40 +7,26 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
-      background: #000; color: #f5f5f5; overflow: hidden;
-      width: 100vw; height: 100vh;
+      margin: 0; font-family: system-ui, -apple-system, "Noto Sans TC", sans-serif;
+      background: #000; color: #f5f5f5; overflow: hidden; width: 100vw; height: 100vh;
     }
     .app-container { height: 100vh; display: flex; flex-direction: column; }
     header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; z-index: 100; flex-shrink: 0; }
     header h1 { margin: 0; font-size: 1.1rem; }
-    
     main { flex: 1; display: flex; min-height: 0; position: relative; }
     
-    /* --- 電腦版樣式 --- */
-    .canvas-section { flex: 3; padding: 0.4rem; position: relative; background: #000; overflow: hidden; }
-    #vectorCanvas { width: 100%; height: 100%; background: #000; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; touch-action: none; }
-
-    /* 電腦版 LOGO 位置 */
-    .company-logo {
-      position: absolute; left: 20px; bottom: 20px; height: 45px;
-      opacity: 0.9; pointer-events: none; z-index: 50;
-    }
+    /* --- 電腦版佈局 --- */
+    .canvas-section { flex: 3; position: relative; background: #000; overflow: hidden; }
+    #vectorCanvas { width: 100%; height: 100%; background: #000; display: block; touch-action: none; }
+    .company-logo { position: absolute; left: 20px; bottom: 20px; height: 45px; opacity: 0.9; pointer-events: none; z-index: 50; }
 
     .control-section { flex: 2; padding: 0.8rem; display: flex; flex-direction: column; gap: 0.6rem; overflow-y: auto; background: #000; border-left: 1px solid #333; }
     .panel { background: #050505; border-radius: 0.4rem; padding: 0.6rem 0.8rem; border: 1px solid #222; font-size: 0.85rem; }
     .panel h2 { margin: 0 0 0.4rem; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; color: #eee; }
     
-    .vec-var {
-      font-family: "Times New Roman", serif; font-style: italic; font-weight: bold;
-      position: relative; display: inline-block; margin-right: 0.1rem; padding-top: 0.4em;
-    }
-    .vec-var::after {
-      content: "→"; position: absolute; top: -0.1em; left: 50%;
-      transform: translateX(-50%) scaleX(0.9); font-size: 0.9em;
-      font-family: sans-serif; font-style: normal; font-weight: normal; line-height: 1;
-    }
+    /* 面板文字符號 */
+    .vec-var { font-family: "Times New Roman", serif; font-style: italic; font-weight: bold; position: relative; display: inline-block; margin-right: 0.1rem; padding-top: 0.4em; }
+    .vec-var::after { content: "⇀"; position: absolute; top: -0.1em; left: 50%; transform: translateX(-50%); font-size: 0.9em; font-family: sans-serif; font-style: normal; font-weight: normal; }
 
     .vector-row { display: grid; grid-template-columns: 50px repeat(4, 1fr); gap: 0.3rem; align-items: center; margin-bottom: 0.4rem; font-size: 0.8rem; }
     .color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -48,31 +34,21 @@
     button { border: none; border-radius: 0.3rem; padding: 0.4rem 0.8rem; cursor: pointer; background: #2563eb; color: #fff; }
     select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.3rem; width: 100%; }
     .result-display { margin-top: 0.4rem; padding: 0.5rem; background: #111; border-radius: 0.3rem; display: flex; align-items: center; gap: 0.4rem; }
-    .info-line { margin: 0.2rem 0; font-size: 0.8rem; color: #ccc; }
+    .info-line { margin: 0.4rem 0; font-size: 0.85rem; color: #ccc; border-bottom: 1px solid #222; padding-bottom: 2px; }
 
     #mobileSettingsBtn { display: none; }
     .close-menu { display: none; }
 
-    /* --- 手機版專屬優化 --- */
+    /* --- 手機版專屬樣式 --- */
     @media (max-width: 768px) {
       .canvas-section { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; padding: 0; }
       #vectorCanvas { border-radius: 0; }
       
-      /* [修改] 手機版 LOGO：右下角，統一般大小 */
-      .company-logo {
-        position: fixed; left: auto;
-        right: 15px; bottom: 15px;
-        height: 38px; /* 統一高度 */
-        z-index: 90; opacity: 1;
-      }
-
-      /* [修改] 手機版設定按鈕：右下角，與 LOGO 並列 */
+      /* LOGO 與 ⚙️ 並列右下角 */
+      .company-logo { position: fixed; left: auto; right: 15px; bottom: 15px; height: 38px; z-index: 90; opacity: 1; }
       #mobileSettingsBtn {
-        display: flex; position: fixed;
-        right: 65px; /* 距離右邊緣：15px(邊距) + 10px(間距) + 40px(預估LOGO寬) */
-        bottom: 15px;
-        width: 38px; height: 38px; /* 統一高度 */
-        background: #2563eb; border-radius: 50%;
+        display: flex; position: fixed; right: 70px; bottom: 15px;
+        width: 38px; height: 38px; background: #2563eb; border-radius: 50%;
         align-items: center; justify-content: center; z-index: 110;
         box-shadow: 0 4px 15px rgba(0,0,0,0.6); cursor: pointer; font-size: 1.4rem;
       }
@@ -85,14 +61,14 @@
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
       .control-section.active { transform: translateY(0); }
-      .close-menu { display: block; text-align: center; padding: 0.8rem; margin-bottom: 1.2rem; background: #333; border-radius: 0.8rem; color: #fff; font-weight: bold; border: 1px solid #555; }
+      .close-menu { display: block; text-align: center; padding: 0.8rem; margin-bottom: 1.2rem; background: #333; border-radius: 0.8rem; color: #fff; font-weight: bold; }
     }
   </style>
 </head>
 <body>
   <div class="app-container">
     <header><h1>向量互動教具</h1></header>
-    <main id="mainView">
+    <main id="mainContainer">
       <section class="canvas-section">
         <canvas id="vectorCanvas"></canvas>
         <img src="company-logo.png" alt="LOGO" class="company-logo">
@@ -104,7 +80,7 @@
         <div class="close-menu" id="closeMenuBtn">確認並關閉選單 ✕</div>
         
         <div class="panel">
-          <h2>向量輸入</h2>
+          <h2>向量輸入 (起點, 分量)</h2>
           <div class="vector-row">
             <label><span class="vec-var">A</span><span class="color-dot" style="background:#60a5fa;"></span></label>
             <input type="number" step="0.1" id="A_tail_x"> <input type="number" step="0.1" id="A_tail_y">
@@ -116,7 +92,7 @@
             <input type="number" step="0.1" id="B_dx"> <input type="number" step="0.1" id="B_dy">
           </div>
           <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-            <button id="applyInputBtn" style="flex:1;">套用數據</button>
+            <button id="applyInputBtn" style="flex:1;">套用修改</button>
             <button id="resetBtn">重設</button>
           </div>
         </div>
@@ -147,28 +123,23 @@
   </div>
 
   <script>
-    // --- 選單互動邏輯 ---
     const mobileBtn = document.getElementById('mobileSettingsBtn');
     const closeBtn = document.getElementById('closeMenuBtn');
     const panel = document.getElementById('controlPanel');
     if(mobileBtn) mobileBtn.onclick = () => panel.classList.add('active');
     if(closeBtn) closeBtn.onclick = () => panel.classList.remove('active');
 
-    // --- 繪圖核心邏輯 ---
     const canvas = document.getElementById("vectorCanvas");
     const ctx = canvas.getContext("2d");
     let width, height, centerX, centerY, scale = 40;
 
     function resizeCanvas() {
-      const parent = (window.innerWidth > 768) ? canvas.parentNode : document.getElementById("mainView");
-      width = parent.clientWidth;
-      height = parent.clientHeight;
+      const container = (window.innerWidth > 768) ? canvas.parentNode : document.getElementById("mainContainer");
+      width = container.clientWidth; height = container.clientHeight;
       const dpr = window.devicePixelRatio || 1;
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
+      canvas.width = width * dpr; canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      centerX = width / 2;
-      centerY = height / 2;
+      centerX = width / 2; centerY = height / 2;
       scale = Math.min(width, height) / 10;
       draw();
     }
@@ -181,44 +152,45 @@
       { id: "A", tail: { x: 0, y: 0 }, dx: 3, dy: 2, color: "#60a5fa" },
       { id: "B", tail: { x: 0, y: 0 }, dx: -1, dy: 3, color: "#4ade80" },
     ];
-    const getVectorById = (id) => vectors.find(v => v.id === id);
     const f2 = (x) => Math.round(x * 100) / 100;
     const snap = (v) => (Math.abs(v - Math.round(v)) < 0.25 ? Math.round(v) : v);
 
-    function syncInputsFromState() {
-      vectors.forEach(v => {
-        document.getElementById(v.id+"_tail_x").value = f2(v.tail.x);
-        document.getElementById(v.id+"_tail_y").value = f2(v.tail.y);
-        document.getElementById(v.id+"_dx").value = f2(v.dx);
-        document.getElementById(v.id+"_dy").value = f2(v.dy);
-      });
-    }
+    // [核心繪圖] 繪製指定的半箭頭符號與文字
+    function drawVectorLabel(text, dx, dy, tx, ty, hx, hy, color) {
+      ctx.save();
+      const midX = (tx + hx) / 2;
+      const midY = (ty + hy) / 2;
+      const angle = Math.atan2(hy - ty, hx - tx);
+      
+      // 動態法線偏移：確保字體永遠在向量側邊 25px
+      const offset = 25;
+      const lx = midX + Math.cos(angle - Math.PI / 2) * offset;
+      const ly = midY + Math.sin(angle - Math.PI / 2) * offset;
 
-    function applyInputsToState() {
-      vectors.forEach(v => {
-        v.tail.x = parseFloat(document.getElementById(v.id+"_tail_x").value || 0);
-        v.tail.y = parseFloat(document.getElementById(v.id+"_tail_y").value || 0);
-        v.dx = parseFloat(document.getElementById(v.id+"_dx").value || 0);
-        v.dy = parseFloat(document.getElementById(v.id+"_dy").value || 0);
-      });
-      draw();
-    }
+      ctx.fillStyle = color;
+      ctx.font = "italic bold 17px 'Times New Roman'";
+      ctx.textAlign = "center";
+      ctx.fillText(text, lx, ly);
 
-    function drawGrid() {
-      ctx.clearRect(0, 0, width, height);
-      ctx.strokeStyle = "#222"; ctx.lineWidth = 1; ctx.beginPath();
-      const uX = Math.ceil(width / scale / 2) + 5; 
-      const uY = Math.ceil(height / scale / 2) + 5;
-      for (let i = -uX; i <= uX; i++) { const x = centerX + i * scale; ctx.moveTo(x, 0); ctx.lineTo(x, height); }
-      for (let j = -uY; j <= uY; j++) { const y = centerY + j * scale; ctx.moveTo(0, y); ctx.lineTo(width, y); }
+      // 繪製半箭頭向量符號 ⇀
+      const charWidth = ctx.measureText(text).width;
+      const symX = lx - charWidth/2;
+      const symY = ly - 18;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(symX, symY);
+      ctx.lineTo(symX + 12, symY); // 主橫線
+      ctx.lineTo(symX + 8, symY - 3); // 只有上方的勾
       ctx.stroke();
-      ctx.strokeStyle = "#888"; ctx.lineWidth = 1.2; ctx.beginPath();
-      ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height);
-      ctx.stroke();
+
+      ctx.font = "bold 13px sans-serif";
+      ctx.textAlign = "left";
+      ctx.fillText(`(${f2(dx)}, ${f2(dy)})`, lx + charWidth/2 + 2, ly);
+      ctx.restore();
     }
 
-    // [修改] 改進的箭頭繪製函式，計算文字避讓位置
-    function drawArrow(fx, fy, tx, ty, color, labelId, dx, dy, dash = []) {
+    function drawArrow(fx, fy, tx, ty, color, label, dx, dy, dash = []) {
       ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 3; ctx.setLineDash(dash);
       ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
       ctx.setLineDash([]);
@@ -227,74 +199,63 @@
       ctx.lineTo(tx - headlen * Math.cos(angle - Math.PI/6), ty - headlen * Math.sin(angle - Math.PI/6));
       ctx.lineTo(tx - headlen * Math.cos(angle + Math.PI/6), ty - headlen * Math.sin(angle + Math.PI/6));
       ctx.closePath(); ctx.fill();
-      
-      if(labelId) {
-        ctx.font = "italic bold 16px serif";
-        // 計算中點
-        const midX = (fx + tx) / 2;
-        const midY = (fy + ty) / 2;
-        // 計算向量方向
-        const vX = tx - fx;
-        const vY = ty - fy;
-        // 計算法線方向 (垂直方向)
-        let pX = -vY;
-        let pY = vX;
-        // 正規化並乘上偏移量 (25px)
-        const len = Math.hypot(pX, pY);
-        const offset = 25;
-        if (len > 0.001) {
-            pX = (pX / len) * offset;
-            pY = (pY / len) * offset;
-        }
-        // 套用偏移後的文字位置
-        const mx = midX + pX;
-        const my = midY + pY + 5; // 微調垂直中心
-
-        ctx.fillText(labelId, mx, my);
-        const tw = ctx.measureText(labelId).width;
-        ctx.font = "bold 13px sans-serif"; ctx.fillText(` (${f2(dx)}, ${f2(dy)})`, mx + tw, my);
-      }
+      if(label) drawVectorLabel(label, dx, dy, fx, fy, tx, ty, color);
       ctx.restore();
     }
 
     function draw() {
-      drawGrid();
+      // 繪製格線
+      ctx.clearRect(0, 0, width, height);
+      ctx.strokeStyle = "#222"; ctx.lineWidth = 1; ctx.beginPath();
+      const u = Math.ceil(width / scale) + 5;
+      for (let i = -u; i <= u; i++) { 
+        const x = centerX + i * scale; ctx.moveTo(x, 0); ctx.lineTo(x, height); 
+        const y = centerY + i * scale; ctx.moveTo(0, y); ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+      ctx.strokeStyle = "#888"; ctx.lineWidth = 1.5; ctx.beginPath();
+      ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height);
+      ctx.stroke();
+
       const op = document.getElementById("operationSelect").value;
       const resDot = document.getElementById("resultDot");
       const resText = document.getElementById("addResultText");
       
+      // 繪製 A, B
       vectors.forEach(v => {
         const t = worldToScreen(v.tail.x, v.tail.y);
         const h = worldToScreen(v.tail.x + v.dx, v.tail.y + v.dy);
         drawArrow(t.sx, t.sy, h.sx, h.sy, v.color, v.id, v.dx, v.dy);
       });
 
+      // 運算邏輯
       if (op !== "none") {
         resDot.style.display = "inline-block";
         const A = vectors[0], B = vectors[1];
         let s, e, mid, hColor, label;
         const vA = '<span class="vec-var">A</span>', vB = '<span class="vec-var">B</span>';
-        
         switch(op) {
-          case "AplusB": s=A.tail; mid={x:A.tail.x+A.dx, y:A.tail.y+A.dy}; e={x:mid.x+B.dx, y:mid.y+B.dy}; hColor="#4ade80"; label=`${vA}+${vB}`; break;
-          case "BplusA": s=B.tail; mid={x:B.tail.x+B.dx, y:B.tail.y+B.dy}; e={x:mid.x+A.dx, y:mid.y+A.dy}; hColor="#60a5fa"; label=`${vB}+${vA}`; break;
-          case "AminusB": s=A.tail; mid={x:A.tail.x+A.dx, y:A.tail.y+A.dy}; e={x:mid.x-B.dx, y:mid.y-B.dy}; hColor="#4ade80"; label=`${vA}-${vB}`; break;
-          case "BminusA": s=B.tail; mid={x:B.tail.x+B.dx, y:B.tail.y+B.dy}; e={x:mid.x-A.dx, y:mid.y-A.dy}; hColor="#60a5fa"; label=`${vB}-${vA}`; break;
+          case "AplusB": s=A.tail; mid={x:A.tail.x+A.dx, y:A.tail.y+A.dy}; e={x:mid.x+B.dx, y:mid.y+B.dy}; hColor="#4ade80"; label=`${vA} + ${vB}`; break;
+          case "BplusA": s=B.tail; mid={x:B.tail.x+B.dx, y:B.tail.y+B.dy}; e={x:mid.x+A.dx, y:mid.y+A.dy}; hColor="#60a5fa"; label=`${vB} + ${vA}`; break;
+          case "AminusB": s=A.tail; mid={x:A.tail.x+A.dx, y:A.tail.y+A.dy}; e={x:mid.x-B.dx, y:mid.y-B.dy}; hColor="#4ade80"; label=`${vA} - ${vB}`; break;
+          case "BminusA": s=B.tail; mid={x:B.tail.x+B.dx, y:B.tail.y+B.dy}; e={x:mid.x-A.dx, y:mid.y-A.dy}; hColor="#60a5fa"; label=`${vB} - ${vA}`; break;
         }
         const ss=worldToScreen(s.x, s.y), ms=worldToScreen(mid.x, mid.y), es=worldToScreen(e.x, e.y);
         drawArrow(ms.sx, ms.sy, es.sx, es.sy, hColor, "", e.x-mid.x, e.y-mid.y, [5, 5]);
         drawArrow(ss.sx, ss.sy, es.sx, es.sy, "#fb923c", "C", e.x-s.x, e.y-s.y);
         resText.innerHTML = `<span class="vec-var">C</span> = ${label} = ${formatVec(e.x-s.x, e.y-s.y)}`;
-        document.getElementById("infoAddVec").innerHTML = `<strong><span class="vec-var" style="color:#fb923c">C</span>：</strong>向量 ${formatVec(e.x-s.x, e.y-s.y)}`;
+        document.getElementById("infoAddVec").innerHTML = `<strong><span class="vec-var" style="color:#fb923c">C</span>(橘)：</strong>向量 ${formatVec(e.x-s.x, e.y-s.y)}`;
       } else {
         resDot.style.display = "none"; resText.textContent = "（無運算）";
         document.getElementById("infoAddVec").textContent = "";
       }
+
+      // 更新詳細資訊
       document.getElementById("infoA").innerHTML = `<strong><span class="vec-var" style="color:#60a5fa">A</span>：</strong>分量 ${formatVec(vectors[0].dx, vectors[0].dy)}, 長度 ${f2(Math.hypot(vectors[0].dx, vectors[0].dy))}`;
       document.getElementById("infoB").innerHTML = `<strong><span class="vec-var" style="color:#4ade80">B</span>：</strong>分量 ${formatVec(vectors[1].dx, vectors[1].dy)}, 長度 ${f2(Math.hypot(vectors[1].dx, vectors[1].dy))}`;
     }
 
-    // --- 拖拉邏輯 ---
+    // --- 拖拉系統 ---
     let drag = null;
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
@@ -302,54 +263,49 @@
       const cy = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: cx - rect.left, y: cy - rect.top };
     }
-    function distSq(p, a) { return (p.x-a.sx)**2 + (p.y-a.sy)**2; }
-
-    function onDown(e) {
-      const p = getPos(e);
-      const tol = 25 * 25;
+    canvas.addEventListener("mousedown", (e) => {
+      const p = getPos(e); const tol = 30 * 30;
       for (let i = vectors.length - 1; i >= 0; i--) {
-        const v = vectors[i];
-        const t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x+v.dx, v.tail.y+v.dy);
-        if (distSq(p, t) < tol) { drag = { id: v.id, mode: "tail" }; break; }
-        if (distSq(p, h) < tol) { drag = { id: v.id, mode: "head" }; break; }
-        const midW = { sx: (t.sx+h.sx)/2, sy: (t.sy+h.sy)/2 };
-        if (distSq(p, midW) < tol * 3) {
-          drag = { id: v.id, mode: "move", offset: screenToWorld(p.x, p.y), origTail: {...v.tail} };
-          break;
-        }
+        const v = vectors[i], t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x+v.dx, v.tail.y+v.dy);
+        if ((p.x-t.sx)**2 + (p.y-t.sy)**2 < tol) { drag = { id: v.id, mode: "tail" }; break; }
+        if ((p.x-h.sx)**2 + (p.y-h.sy)**2 < tol) { drag = { id: v.id, mode: "head" }; break; }
+        const midX = (t.sx+h.sx)/2, midY = (t.sy+h.sy)/2;
+        if ((p.x-midX)**2 + (p.y-midY)**2 < tol * 2) { drag = { id: v.id, mode: "move", offset: screenToWorld(p.x, p.y), origTail: {...v.tail} }; break; }
       }
       if(drag) e.preventDefault();
-    }
-
-    function onMove(e) {
+    });
+    window.addEventListener("mousemove", (e) => {
       if (!drag) return;
-      const p = getPos(e); const w = screenToWorld(p.x, p.y);
-      const v = getVectorById(drag.id);
-      if (drag.mode === "tail") {
-        const head = { x: v.tail.x + v.dx, y: v.tail.y + v.dy };
-        v.tail.x = snap(w.x); v.tail.y = snap(w.y);
-        v.dx = head.x - v.tail.x; v.dy = head.y - v.tail.y;
-      } else if (drag.mode === "head") {
-        v.dx = snap(w.x - v.tail.x); v.dy = snap(w.y - v.tail.y);
-      } else if (drag.mode === "move") {
-        v.tail.x = snap(drag.origTail.x + (w.x - drag.offset.x));
-        v.tail.y = snap(drag.origTail.y + (w.y - drag.offset.y));
-      }
+      const p = getPos(e); const w = screenToWorld(p.x, p.y); const v = vectors.find(vec => vec.id === drag.id);
+      if (drag.mode === "tail") { const head = { x: v.tail.x + v.dx, y: v.tail.y + v.dy }; v.tail.x = snap(w.x); v.tail.y = snap(w.y); v.dx = head.x - v.tail.x; v.dy = head.y - v.tail.y; }
+      else if (drag.mode === "head") { v.dx = snap(w.x - v.tail.x); v.dy = snap(w.y - v.tail.y); }
+      else if (drag.mode === "move") { v.tail.x = snap(drag.origTail.x + (w.x - drag.offset.x)); v.tail.y = snap(drag.origTail.y + (w.y - drag.offset.y)); }
       syncInputsFromState(); draw();
-      e.preventDefault();
-    }
-
-    canvas.addEventListener("mousedown", onDown);
-    window.addEventListener("mousemove", onMove);
+    });
     window.addEventListener("mouseup", () => drag = null);
-    canvas.addEventListener("touchstart", onDown, {passive: false});
-    window.addEventListener("touchmove", onMove, {passive: false});
+    canvas.addEventListener("touchstart", (e) => canvas.dispatchEvent(new MouseEvent('mousedown', {clientX: e.touches[0].clientX, clientY: e.touches[0].clientY})), {passive: false});
+    window.addEventListener("touchmove", (e) => window.dispatchEvent(new MouseEvent('mousemove', {clientX: e.touches[0].clientX, clientY: e.touches[0].clientY})), {passive: false});
     window.addEventListener("touchend", () => drag = null);
 
-    document.getElementById("applyInputBtn").onclick = applyInputsToState;
+    document.getElementById("applyInputBtn").onclick = () => {
+      vectors.forEach(v => {
+        v.tail.x = parseFloat(document.getElementById(v.id+"_tail_x").value || 0);
+        v.tail.y = parseFloat(document.getElementById(v.id+"_tail_y").value || 0);
+        v.dx = parseFloat(document.getElementById(v.id+"_dx").value || 0);
+        v.dy = parseFloat(document.getElementById(v.id+"_dy").value || 0);
+      });
+      draw();
+    };
     document.getElementById("resetBtn").onclick = () => location.reload();
     document.getElementById("operationSelect").onchange = draw;
-    
+
+    function syncInputsFromState() {
+      vectors.forEach(v => {
+        document.getElementById(v.id+"_tail_x").value = f2(v.tail.x); document.getElementById(v.id+"_tail_y").value = f2(v.tail.y);
+        document.getElementById(v.id+"_dx").value = f2(v.dx); document.getElementById(v.id+"_dy").value = f2(v.dy);
+      });
+    }
+
     resizeCanvas(); syncInputsFromState();
   </script>
 </body>
