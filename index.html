@@ -15,13 +15,15 @@
     header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; }
     header h1 { margin: 0; font-size: 1.1rem; }
     main { flex: 1; display: flex; min-height: 0; }
+    
+    /* 向量圖形區域 */
     .canvas-section { flex: 3; padding: 0.4rem; position: relative; }
     #vectorCanvas { width: 100%; height: 100%; background: #000; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; }
 
-    /* 電腦版預設 LOGO：左下角 */
+    /* 電腦版 LOGO 定位：在座標圖左下角 */
     .company-logo {
       position: absolute; left: 20px; bottom: 20px; height: 45px;
-      opacity: 0.9; pointer-events: none; z-index: 10;
+      opacity: 0.9; pointer-events: none; z-index: 100;
     }
 
     .control-section { flex: 2; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; }
@@ -44,19 +46,30 @@
     select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.2rem; }
     .info-text { font-size: 0.8rem; margin: 0.1rem 0; color: #ccc; display: flex; align-items: center; gap: 0.3rem; }
 
-    /* 手機版專屬樣式 */
+    /* --- 手機版專屬優化 (不影響電腦版) --- */
     @media (max-width: 768px) { 
       main { flex-direction: column; } 
       
-      /* 1. 讓向量圖區域變大 (從 45 提升到 60) */
-      .canvas-section { height: 60vh; } 
+      /* 1. 座標區域高度大幅拉長至螢幕 70%，使座標軸往下延伸 */
+      .canvas-section { 
+        height: 70vh; 
+        flex: none;
+      } 
 
-      /* 2. 手機版 LOGO 移至右下角並縮小 */
+      /* 2. 控制區縮小高度並可捲動 */
+      .control-section {
+        height: 30vh;
+        flex: none;
+      }
+
+      /* 3. LOGO 改為固定在整個螢幕右下角並縮小體積 */
       .company-logo {
-        left: auto;      /* 取消左側定位 */
-        right: 15px;     /* 改為右側 15px */
-        bottom: 15px;    /* 距離底部 15px */
-        height: 30px;    /* 縮小高度 */
+        position: fixed; /* 脫離容器，相對於整個螢幕定位 */
+        left: auto;
+        right: 12px;
+        bottom: 12px;
+        height: 25px;    /* 縮小 LOGO 以免遮擋操作 */
+        opacity: 0.8;
       }
     }
   </style>
@@ -114,7 +127,6 @@
   </div>
 
   <script>
-    // (Script 部分保持不變)
     const canvas = document.getElementById("vectorCanvas");
     const ctx = canvas.getContext("2d");
     let width = 0, height = 0, centerX = 0, centerY = 0, scale = 40;
@@ -126,6 +138,7 @@
       canvas.width = width * dpr; canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       centerX = width / 2; centerY = height / 2;
+      // 依比例自動調整格子大小
       scale = Math.min(width, height) / 10;
       draw();
     }
@@ -304,7 +317,6 @@
         let newTail = { x: draggingState.initTail.x + dx, y: draggingState.initTail.y + dy };
         let newHead = { x: newTail.x + v.dx, y: newTail.y + v.dy };
 
-        // 平移時的「雙端點」互吸判定
         if (Math.hypot(newTail.x - otherV.tail.x, newTail.y - otherV.tail.y) < 0.3) {
             newTail = { x: otherV.tail.x, y: otherV.tail.y };
         } else if (Math.hypot(newTail.x - otherHead.x, newTail.y - otherHead.y) < 0.3) {
