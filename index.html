@@ -12,21 +12,16 @@
       background: #000; color: #f5f5f5; overflow: hidden;
     }
     .app-container { min-height: 100vh; display: flex; flex-direction: column; }
-    header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; }
+    header { padding: 0.6rem 0.9rem; background: #050505; border-bottom: 1px solid #333; z-index: 10; }
     header h1 { margin: 0; font-size: 1.1rem; }
-    main { flex: 1; display: flex; min-height: 0; }
+    main { flex: 1; display: flex; min-height: 0; position: relative; }
     
-    /* 向量圖形區域 */
-    .canvas-section { flex: 3; padding: 0.4rem; position: relative; }
-    #vectorCanvas { width: 100%; height: 100%; background: #000; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; }
+    /* 向量圖區域 */
+    .canvas-section { flex: 3; padding: 0.4rem; position: relative; background: #000; }
+    #vectorCanvas { width: 100%; height: 100%; border-radius: 0.4rem; box-shadow: 0 0 0 1px #333; display: block; }
 
-    /* 電腦版 LOGO 定位：在座標圖左下角 */
-    .company-logo {
-      position: absolute; left: 20px; bottom: 20px; height: 45px;
-      opacity: 0.9; pointer-events: none; z-index: 100;
-    }
-
-    .control-section { flex: 2; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; }
+    /* 控制面板 (電腦版預設) */
+    .control-section { flex: 2; padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; overflow-y: auto; background: #000; transition: transform 0.3s ease; }
     .panel { background: #050505; border-radius: 0.4rem; padding: 0.5rem 0.6rem; border: 1px solid #222; font-size: 0.85rem; }
     .panel h2 { margin: 0 0 0.35rem; font-size: 0.95rem; border-bottom: 1px solid #333; padding-bottom: 0.2rem; }
     .vector-row { display: grid; grid-template-columns: 50px repeat(4, 1fr); gap: 0.2rem; align-items: center; margin-bottom: 0.25rem; font-size: 0.8rem; }
@@ -46,30 +41,47 @@
     select { background: #111; color: #f5f5f5; border-radius: 0.3rem; border: 1px solid #333; padding: 0.2rem; }
     .info-text { font-size: 0.8rem; margin: 0.1rem 0; color: #ccc; display: flex; align-items: center; gap: 0.3rem; }
 
-    /* --- 手機版專屬優化 (不影響電腦版) --- */
-    @media (max-width: 768px) { 
-      main { flex-direction: column; } 
-      
-      /* 1. 座標區域高度大幅拉長至螢幕 70%，使座標軸往下延伸 */
-      .canvas-section { 
-        height: 70vh; 
-        flex: none;
-      } 
+    /* 電腦版 LOGO */
+    .company-logo {
+      position: absolute; left: 20px; bottom: 20px; height: 40px;
+      opacity: 0.8; pointer-events: none; z-index: 5;
+    }
 
-      /* 2. 控制區縮小高度並可捲動 */
-      .control-section {
-        height: 30vh;
-        flex: none;
+    /* 隱藏設定按鈕 (電腦版不需要) */
+    #mobileSettingsBtn { display: none; }
+
+    /* --- 手機版專屬樣式 --- */
+    @media (max-width: 768px) {
+      /* 讓畫布填滿整個 main */
+      .canvas-section { flex: 1; height: 100%; padding: 0; }
+      #vectorCanvas { border-radius: 0; }
+
+      /* 設定按鈕：放在右下角 LOGO 旁邊 */
+      #mobileSettingsBtn {
+        display: flex; position: fixed; right: 15px; bottom: 50px; /* 在 LOGO 上方一點 */
+        width: 45px; height: 45px; background: #2563eb; border-radius: 50%;
+        align-items: center; justify-content: center; z-index: 100;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5); cursor: pointer;
       }
 
-      /* 3. LOGO 改為固定在整個螢幕右下角並縮小體積 */
       .company-logo {
-        position: fixed; /* 脫離容器，相對於整個螢幕定位 */
-        left: auto;
-        right: 12px;
-        bottom: 12px;
-        height: 25px;    /* 縮小 LOGO 以免遮擋操作 */
-        opacity: 0.8;
+        position: fixed; left: auto; right: 15px; bottom: 15px;
+        height: 25px; z-index: 90; opacity: 1;
+      }
+
+      /* 手機版控制選單：改為彈出式遮罩 */
+      .control-section {
+        position: fixed; bottom: 0; left: 0; width: 100%; height: 70vh;
+        z-index: 200; background: #0a0a0a; border-top: 2px solid #333;
+        transform: translateY(100%); /* 預設隱藏在下方 */
+        padding: 1.2rem 1rem; border-radius: 1.2rem 1.2rem 0 0;
+      }
+      .control-section.active { transform: translateY(0); }
+
+      /* 關閉選單的按鈕 */
+      .close-menu {
+        display: block; text-align: center; padding: 0.5rem; margin-bottom: 1rem;
+        background: #222; border-radius: 0.5rem; color: #aaa; cursor: pointer;
       }
     }
   </style>
@@ -82,9 +94,14 @@
         <canvas id="vectorCanvas"></canvas>
         <img src="company-logo.png" alt="LOGO" class="company-logo">
       </section>
-      <section class="control-section">
+
+      <div id="mobileSettingsBtn">⚙️</div>
+
+      <section class="control-section" id="controlPanel">
+        <div class="close-menu" id="closeMenuBtn">確認並關閉選單 ✕</div>
+        
         <div class="panel">
-          <h2>向量輸入</h2>
+          <h2>向量輸入 (起點x, 起點y, 分量x, 分量y)</h2>
           <div class="vector-row">
             <label><span class="vec-var">A</span> <span class="color-dot" style="background:#60a5fa;"></span></label>
             <input type="number" step="0.1" id="A_tail_x"> <input type="number" step="0.1" id="A_tail_y">
@@ -95,29 +112,31 @@
             <input type="number" step="0.1" id="B_tail_x"> <input type="number" step="0.1" id="B_tail_y">
             <input type="number" step="0.1" id="B_dx"> <input type="number" step="0.1" id="B_dy">
           </div>
-          <div style="display:flex; gap:0.5rem; margin-top:0.3rem;">
-            <button id="applyInputBtn">套用輸入</button>
+          <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+            <button id="applyInputBtn" style="flex:1;">套用修改</button>
             <button id="resetBtn">重設</button>
           </div>
         </div>
+
         <div class="panel">
           <h2>向量運算</h2>
           <div style="display:flex; align-items:center; gap:0.5rem;">
-            <span>運算：</span>
-            <select id="operationSelect">
-              <option value="none">不顯示</option>
-              <option value="AplusB">A + B</option>
+            <span>模式：</span>
+            <select id="operationSelect" style="flex:1;">
+              <option value="none">不顯示運算</option>
+              <option value="AplusB">A + B (合成)</option>
               <option value="BplusA">B + A</option>
-              <option value="AminusB">A - B</option>
+              <option value="AminusB">A - B (差)</option>
               <option value="BminusA">B - A</option>
             </select>
           </div>
-          <div class="info-text" style="margin-top:0.4rem; padding: 0.4rem; background:#111; border-radius:4px;">
+          <div class="info-text" style="margin-top:0.6rem; padding: 0.6rem; background:#111; border-radius:4px; border: 1px solid #333;">
             結果：<span id="addResultText">（未顯示）</span>
           </div>
         </div>
+
         <div class="panel">
-          <h2>詳細資訊</h2>
+          <h2>詳細座標資訊</h2>
           <div class="info-text"><strong><span class="vec-var" style="color:#60a5fa">A</span>：</strong><span id="infoA"></span></div>
           <div class="info-text"><strong><span class="vec-var" style="color:#4ade80">B</span>：</strong><span id="infoB"></span></div>
           <div class="info-text"><strong><span class="vec-var" style="color:#fb923c">C</span>(橘)：</strong><span id="infoAddVec"></span></div>
@@ -127,6 +146,15 @@
   </div>
 
   <script>
+    // --- 選單開關邏輯 ---
+    const settingsBtn = document.getElementById('mobileSettingsBtn');
+    const closeBtn = document.getElementById('closeMenuBtn');
+    const panel = document.getElementById('controlPanel');
+
+    settingsBtn.onclick = () => panel.classList.add('active');
+    closeBtn.onclick = () => panel.classList.remove('active');
+
+    // --- 原有繪圖邏輯 (完全保留) ---
     const canvas = document.getElementById("vectorCanvas");
     const ctx = canvas.getContext("2d");
     let width = 0, height = 0, centerX = 0, centerY = 0, scale = 40;
@@ -138,7 +166,6 @@
       canvas.width = width * dpr; canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       centerX = width / 2; centerY = height / 2;
-      // 依比例自動調整格子大小
       scale = Math.min(width, height) / 10;
       draw();
     }
@@ -278,13 +305,14 @@
     }
 
     function handleDown(evt) {
-      evt.preventDefault(); const pos = getEventPos(evt);
+      if (draggingState) return;
+      const pos = getEventPos(evt);
       for (let i = vectors.length - 1; i >= 0; i--) {
         const v = vectors[i]; const t = worldToScreen(v.tail.x, v.tail.y), h = worldToScreen(v.tail.x + v.dx, v.tail.y + v.dy);
         const tPt = {x: t.sx, y: t.sy}, hPt = {x: h.sx, y: h.sy};
-        if (dist2(pos, tPt) < 400) { draggingState = { vecId: v.id, mode: "tail" }; return; }
-        if (dist2(pos, hPt) < 400) { draggingState = { vecId: v.id, mode: "head" }; return; }
-        if (distPointToSegment2(pos, tPt, hPt) < 400) {
+        if (dist2(pos, tPt) < 900) { draggingState = { vecId: v.id, mode: "tail" }; return; }
+        if (dist2(pos, hPt) < 900) { draggingState = { vecId: v.id, mode: "head" }; return; }
+        if (distPointToSegment2(pos, tPt, hPt) < 900) {
           draggingState = { vecId: v.id, mode: "move", initTail: {...v.tail}, initClickWorld: screenToWorld(pos.x, pos.y) };
           return;
         }
@@ -316,7 +344,6 @@
         const dx = wPos.x - draggingState.initClickWorld.x, dy = wPos.y - draggingState.initClickWorld.y;
         let newTail = { x: draggingState.initTail.x + dx, y: draggingState.initTail.y + dy };
         let newHead = { x: newTail.x + v.dx, y: newTail.y + v.dy };
-
         if (Math.hypot(newTail.x - otherV.tail.x, newTail.y - otherV.tail.y) < 0.3) {
             newTail = { x: otherV.tail.x, y: otherV.tail.y };
         } else if (Math.hypot(newTail.x - otherHead.x, newTail.y - otherHead.y) < 0.3) {
@@ -336,6 +363,7 @@
     canvas.addEventListener("mousedown", handleDown); canvas.addEventListener("mousemove", handleMove);
     window.addEventListener("mouseup", () => draggingState = null);
     canvas.addEventListener("touchstart", handleDown, { passive: false }); canvas.addEventListener("touchmove", handleMove, { passive: false });
+    canvas.addEventListener("touchend", () => draggingState = null);
     document.getElementById("applyInputBtn").onclick = applyInputsToState;
     document.getElementById("resetBtn").onclick = () => location.reload();
     document.getElementById("operationSelect").onchange = draw;
